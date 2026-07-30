@@ -35,7 +35,10 @@ const moduleIds = [
   "inference",
 ];
 let sectionCount = 0;
-let requirementCards = 0;
+let productionScreensVisited = 0;
+const internalCopy = /标书|本原型|条款覆盖|能力核验|已验证覆盖|可核验点/;
+check(!internalCopy.test(await page.locator("body").innerText()), "overview exposes internal bid/review copy");
+check((await page.locator(".scope,.audit-card,.hero").count()) === 0, "overview still renders prototype explanation surfaces");
 for (const id of moduleIds) {
   await page.locator(`[data-page="${id}"]`).first().click();
   const count = await page.locator("[data-section]").count();
@@ -43,26 +46,10 @@ for (const id of moduleIds) {
   for (let index = 0; index < count; index += 1) {
     await page.locator("[data-section]").nth(index).click();
     sectionCount += 1;
-    const cards = await page.locator(".req").count();
-    requirementCards += cards;
-    check(cards > 0, `${id} section ${index}: no requirement cards`);
+    productionScreensVisited += 1;
     check((await page.locator(".work-card h2").count()) > 0, `${id} section ${index}: no workbench title`);
-
-    const targetResult = await page.evaluate(() => {
-      const reqButton = document.querySelector(".req [data-requirement]");
-      reqButton?.click();
-      const target = document.activeElement;
-      return {
-        exists: Boolean(target?.closest?.(".work-card")),
-        id: target?.id || "",
-        controlId: target?.dataset.controlId || "",
-        focused: target === document.activeElement,
-        rightCardHasReqId: Boolean(document.querySelector(".audit-card [data-req-id]")),
-      };
-    });
-    check(targetResult.exists && targetResult.controlId.startsWith("control-"), `${id} section ${index}: requirement not mapped to control-*`);
-    check(targetResult.focused, `${id} section ${index}: requirement locator did not focus business control`);
-    check(!targetResult.rightCardHasReqId, `${id} section ${index}: audit card still masquerades as requirement target`);
+    check((await page.locator(".scope,.audit-card,.hero,.req").count()) === 0, `${id} section ${index}: internal explanation UI is visible`);
+    check(!internalCopy.test(await page.locator("body").innerText()), `${id} section ${index}: internal bid/review copy is visible`);
 
     const unnamed = await page.evaluate(() =>
       [...document.querySelectorAll(".work-card input,.work-card select,.work-card textarea")]
@@ -77,7 +64,7 @@ for (const id of moduleIds) {
   }
 }
 check(sectionCount === 39, `expected 39 sections, got ${sectionCount}`);
-check(requirementCards === 143, `expected 143 feature cards, got ${requirementCards}`);
+check(productionScreensVisited === 39, `expected 39 production screens, got ${productionScreensVisited}`);
 
 // Autoregressive configuration validation, export and real detail drawer.
 await page.locator('[data-page="autoregressive"]').first().click();
@@ -199,7 +186,7 @@ const pdfDownload = await pdfDownloadPromise;
 const pdfBytes = await readFile(await pdfDownload.path());
 check(pdfDownload.suggestedFilename().endsWith(".pdf") && pdfBytes.subarray(0, 4).equals(Buffer.from("%PDF")), "whitepaper is not a valid PDF");
 
-// Modal focus, Escape and requirement-to-business-control locator.
+// Modal focus and Escape.
 await page.locator('[data-page="autoregressive"]').first().click();
 await page.locator('[data-section="0"]').click();
 await page.locator("#learningRate").fill("0.00002");
@@ -209,23 +196,11 @@ check((await page.locator("#modalBackdrop.open").count()) === 1, "valid task sub
 check(await page.locator("#modal").evaluate((el) => el.contains(document.activeElement)), "modal did not receive focus");
 await page.keyboard.press("Escape");
 check((await page.locator("#modalBackdrop.open").count()) === 0, "Escape did not close modal");
-await page.locator(".req [data-requirement]").first().click();
-const located = await page.evaluate(() => {
-  const el = document.activeElement;
-  return { controlId: el?.dataset.controlId || "", reqId: el?.dataset.reqId || "", focused: el?.classList.contains("req-focus") };
-});
-check(located.controlId.startsWith("control-") && located.reqId && located.focused, "requirement did not locate an actual business control");
-
-await page.locator('[data-page="coverage"]').first().click();
-await page.locator("#coverageSearch").fill("模型版本");
-await page.locator('[data-action="searchCoverage"]').click();
-check((await page.locator("#coverageBody tr").count()) > 0, "coverage search returned no rows");
-check((await page.locator("#coverageBody").innerText()).includes("data-control-id"), "coverage matrix still points to audit cards");
-await page.screenshot({ path: screenshotPath("coverage-desktop.png"), fullPage: true });
 
 // Mobile navigation: scrim, focus trap, aria-expanded reset and no overflow.
 await page.setViewportSize({ width: 390, height: 844 });
 await page.goto(`${base}/#overview`, { waitUntil: "networkidle" });
+await page.locator("#toasts").evaluate((el) => el.replaceChildren());
 const menuButton = page.locator('[data-action="menu"]');
 await menuButton.click();
 check((await page.locator("#sidebar.open").count()) === 1, "mobile menu did not open");
@@ -236,6 +211,7 @@ await page.keyboard.press("Tab");
 check(await page.locator("#sidebar").evaluate((el) => el.contains(document.activeElement)), "mobile nav focus escaped to background");
 await page.getByRole("button", { name: "关闭导航" }).click();
 check((await menuButton.getAttribute("aria-expanded")) === "false", "mobile menu aria-expanded not reset");
+await page.waitForTimeout(300);
 await page.screenshot({ path: screenshotPath("overview-mobile.png"), fullPage: true });
 
 await page.setViewportSize({ width: 320, height: 700 });
@@ -248,7 +224,7 @@ const filePage = await browser.newPage({ viewport: { width: 1200, height: 800 } 
 const fileErrors = [];
 filePage.on("pageerror", (error) => fileErrors.push(error.message));
 await filePage.goto(new URL("../index.html", import.meta.url).href, { waitUntil: "load" });
-check((await filePage.locator("#nav button").count()) >= 12, "file:// standalone navigation failed");
+check((await filePage.locator("#nav button").count()) >= 11, "file:// standalone navigation failed");
 check(fileErrors.length === 0, `file:// errors: ${fileErrors.join("; ")}`);
 await filePage.close();
 
@@ -256,7 +232,7 @@ await browser.close();
 const report = {
   moduleCount: moduleIds.length,
   sectionCount,
-  requirementCardsVisited: requirementCards,
+  productionScreensVisited,
   consoleErrors,
   failures,
   passed: failures.length === 0 && consoleErrors.length === 0,
