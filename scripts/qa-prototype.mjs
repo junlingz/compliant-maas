@@ -11,6 +11,13 @@ const browser = await chromium.launch({
   executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+let navigationSequence = 0;
+const freshUrl = (hash = "") => {
+  const url = new URL(base);
+  url.searchParams.set("qa", `${Date.now()}-${navigationSequence += 1}`);
+  url.hash = hash;
+  return url.href;
+};
 const failures = [];
 const consoleErrors = [];
 page.on("console", (message) => {
@@ -21,7 +28,7 @@ const check = (condition, message) => {
   if (!condition) failures.push(message);
 };
 
-await page.goto(base, { waitUntil: "networkidle" });
+await page.goto(freshUrl(), { waitUntil: "networkidle" });
 await page.screenshot({ path: screenshotPath("overview-desktop.png"), fullPage: true });
 
 const moduleIds = [
@@ -36,9 +43,10 @@ const moduleIds = [
 ];
 let sectionCount = 0;
 let productionScreensVisited = 0;
-const internalCopy = /标书|本原型|条款覆盖|能力核验|已验证覆盖|可核验点/;
+const internalCopy = /标书|本原型|条款|合规覆盖|需求映射|能力核验|覆盖完整|已验证覆盖|可核验点/;
 check(!internalCopy.test(await page.locator("body").innerText()), "overview exposes internal bid/review copy");
 check((await page.locator(".scope,.audit-card,.hero").count()) === 0, "overview still renders prototype explanation surfaces");
+check((await page.locator('[data-page="coverage"]').count()) === 0, "overview still exposes an internal coverage entry");
 for (const id of moduleIds) {
   await page.locator(`[data-page="${id}"]`).first().click();
   const count = await page.locator("[data-section]").count();
@@ -69,6 +77,7 @@ check(productionScreensVisited === 39, `expected 39 production screens, got ${pr
 // Autoregressive configuration validation, export and real detail drawer.
 await page.locator('[data-page="autoregressive"]').first().click();
 await page.locator('[data-section="0"]').click();
+await page.screenshot({ path: screenshotPath("workbench-desktop.png"), fullPage: true });
 await page.locator("#architectureSelect").selectOption({ label: "MoE 稀疏专家" });
 check(await page.locator("#moePanel").isVisible(), "MoE parameters did not appear");
 check((await page.locator("#parameterSummary").textContent()).includes("Experts"), "MoE summary did not update");
@@ -199,7 +208,7 @@ check((await page.locator("#modalBackdrop.open").count()) === 0, "Escape did not
 
 // Mobile navigation: scrim, focus trap, aria-expanded reset and no overflow.
 await page.setViewportSize({ width: 390, height: 844 });
-await page.goto(`${base}/#overview`, { waitUntil: "networkidle" });
+await page.goto(freshUrl("overview"), { waitUntil: "networkidle" });
 await page.locator("#toasts").evaluate((el) => el.replaceChildren());
 const menuButton = page.locator('[data-action="menu"]');
 await menuButton.click();
@@ -215,7 +224,7 @@ await page.waitForTimeout(300);
 await page.screenshot({ path: screenshotPath("overview-mobile.png"), fullPage: true });
 
 await page.setViewportSize({ width: 320, height: 700 });
-await page.goto(`${base}/#evaluation`, { waitUntil: "networkidle" });
+await page.goto(freshUrl("evaluation"), { waitUntil: "networkidle" });
 const widths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
 check(widths.scroll === widths.inner, `320px viewport overflow: ${JSON.stringify(widths)}`);
 
