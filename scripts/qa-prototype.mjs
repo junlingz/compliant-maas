@@ -97,6 +97,35 @@ check((await page.locator("#drawerBackdrop.open").count()) === 1, "business deta
 check(await page.locator("#drawer").evaluate((el) => el.contains(document.activeElement)), "drawer did not receive focus");
 await page.keyboard.press("Escape");
 check((await page.locator("#drawerBackdrop.open").count()) === 0, "Escape did not close drawer");
+const modelChooserPromise = page.waitForEvent("filechooser");
+const importedModelCountBefore = await page.locator(".work-card .model-grid .model-card").count();
+await page.locator('[data-action="upload"][data-context="model"]').click();
+const modelChooser = await modelChooserPromise;
+check(await page.locator("#hiddenFile").getAttribute("multiple") !== null, "model import does not allow weight + config selection");
+await modelChooser.setFiles([
+  { name: "weights.safetensors", mimeType: "application/octet-stream", buffer: Buffer.from("weights") },
+  { name: "config.json", mimeType: "application/json", buffer: Buffer.from('{"model_type":"decoder"}') },
+]);
+check((await page.locator("#modal").innerText()).includes("权重") && (await page.locator("#modal").innerText()).includes("配置"), "model import did not pair weight and config");
+await page.locator('[data-action="confirmModal"]').click();
+check((await page.locator(".work-card .model-grid .model-card").count()) === importedModelCountBefore + 1, "validated model import did not create a model/version card");
+check((await page.locator("#selectedModelState").innerText()).includes("weights · v1.0"), "imported model was not selected as the current version");
+check((await page.locator("#modalBackdrop.open").count()) === 0 && (await page.locator("#modal").textContent()) === "", "model import confirmation left modal residue");
+
+// Upload parsing rejects malformed JSONL instead of validating by extension alone.
+await page.locator('[data-page="autoregressive"]').first().click();
+await page.locator('[data-section="0"]').click();
+const invalidJsonlChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="autoregressive-dataset"]').click();
+const invalidJsonlChooser = await invalidJsonlChooserPromise;
+await invalidJsonlChooser.setFiles({
+  name: "broken.jsonl",
+  mimeType: "application/x-ndjson",
+  buffer: Buffer.from('{"text":"valid"}\n{"text":'),
+});
+await page.waitForTimeout(30);
+check((await page.locator("#modalTitle").textContent()) === "JSONL 解析失败", "malformed multiline JSONL was accepted");
+await page.locator('[data-action="closeModal"]').first().click();
 
 // Seq2Seq architecture details are visible and precise.
 await page.locator('[data-page="seq2seq"]').first().click();
@@ -104,12 +133,51 @@ await page.locator('[data-section="1"]').click();
 const seqDetails = await page.locator("#seq2seqArchitectureDetail").innerText();
 check(seqDetails.includes("406M") && seqDetails.includes("16"), "Seq2Seq architecture lacks layers/params/heads");
 
+// Source/target corpora are parsed by line and mismatches block submission.
+await page.locator('[data-section="0"]').click();
+const sourceChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="seq2seq-src"]').click();
+const sourceChooser = await sourceChooserPromise;
+await sourceChooser.setFiles({
+  name: "src.txt",
+  mimeType: "text/plain",
+  buffer: Buffer.from("第一行\n第二行"),
+});
+await page.waitForTimeout(30);
+await page.locator('[data-action="confirmModal"]').click();
+const targetChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="seq2seq-tgt"]').click();
+const targetChooser = await targetChooserPromise;
+await targetChooser.setFiles({
+  name: "tgt.txt",
+  mimeType: "text/plain",
+  buffer: Buffer.from("only one line"),
+});
+await page.waitForTimeout(30);
+check((await page.locator("#modalTitle").textContent()) === "语料对齐失败", "unequal Seq2Seq line counts were accepted");
+check((await page.locator("#alignmentStatus").innerText()).includes("2 / 1") && (await page.locator("#alignmentStatus").innerText()).includes("不一致"), "Seq2Seq alignment status did not expose actual line counts");
+await page.locator('[data-action="closeModal"]').first().click();
+await page.locator('[data-action="startTask"]').first().click();
+check((await page.locator("#modalBackdrop.open").count()) === 0, "Seq2Seq submission was not blocked after alignment failure");
+
 // Text-image parameter preset changes actual fields.
 await page.locator('[data-page="text2image"]').first().click();
 await page.locator('[data-section="2"]').click();
 const presetBefore = await page.locator(".form-grid input").first().inputValue();
 await page.locator('[data-action="applyPreset"]').nth(1).click();
 check((await page.locator(".form-grid input").first().inputValue()) !== presetBefore, "hyperparameter preset did not update inputs");
+await page.locator('[data-section="0"]').click();
+const invalidImageChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="image-pairs"]').click();
+const invalidImageChooser = await invalidImageChooserPromise;
+await invalidImageChooser.setFiles({
+  name: "damaged.jpg",
+  mimeType: "image/jpeg",
+  buffer: Buffer.from("not-a-decodable-image"),
+});
+await page.waitForTimeout(100);
+check((await page.locator("#modalTitle").textContent()) === "图像校验失败", "damaged image was accepted using extension/size only");
+await page.locator('[data-action="closeModal"]').first().click();
 
 // Distributed global performance, sortable nodes and dynamic aggregation.
 await page.locator('[data-page="distributed"]').first().click();
@@ -128,6 +196,10 @@ await page.locator('[data-section="1"]').click();
 check((await page.locator("[data-parallel]").count()) === 4, "parallel workbench missing four paradigms");
 await page.locator('[data-action="validateParallel"]').click();
 check((await page.locator("#parallelPreview").textContent()).includes("passed"), "parallel validation did not update preview");
+await page.locator('[data-section="2"]').click();
+check((await page.getByText("100B 混合并行训练").count()) === 1 && (await page.getByText("自定义通信插件").count()) === 1, "distributed scenario examples are missing");
+await page.locator('[data-action="runDistributedExample"]').first().click();
+check((await page.locator("#distributedExampleOutput").innerText()).includes("91.8%"), "distributed example did not produce expected output");
 
 // Fine-tuning has chart, terminal and final report with performance/time/resources.
 await page.locator('[data-page="finetune"]').first().click();
@@ -150,6 +222,11 @@ check((await page.locator("#liveStep").textContent()).includes("最终"), "RL hi
 const viewBoxBefore = await page.locator(".chart svg").getAttribute("viewBox");
 await page.locator('[data-action="zoomChart"]').click();
 check((await page.locator(".chart svg").getAttribute("viewBox")) !== viewBoxBefore, "RL zoom did not change viewBox");
+await page.locator('[data-section="2"]').click();
+await page.locator('[data-action="rlStart"]').click();
+check((await page.locator("#rlLifecycleStatus").textContent()) === "运行中", "RL lifecycle start API did not update status");
+await page.locator('[data-action="rlTerminate"]').click();
+check((await page.locator("#rlLifecycleResponse").innerText()).includes("terminate"), "RL lifecycle terminate API did not return response");
 
 // Evaluation type linkage and report-specific visualization.
 await page.locator('[data-page="evaluation"]').first().click();
@@ -205,6 +282,155 @@ check((await page.locator("#modalBackdrop.open").count()) === 1, "valid task sub
 check(await page.locator("#modal").evaluate((el) => el.contains(document.activeElement)), "modal did not receive focus");
 await page.keyboard.press("Escape");
 check((await page.locator("#modalBackdrop.open").count()) === 0, "Escape did not close modal");
+check((await page.locator("#modal").textContent()) === "", "closed modal retained stale content");
+
+// Release-critical requirements: editable training controls and new-task monitor identity.
+check((await page.locator("#optimizer").count()) === 1, "autoregressive optimizer is not editable");
+check((await page.locator("#lrSchedule").count()) === 1, "autoregressive LR schedule is missing");
+check((await page.locator("#weightDecay").count()) === 1 && (await page.locator("#gradientClip").count()) === 1, "autoregressive stability parameters missing");
+check((await page.locator("#checkpointInterval").count()) === 1 && (await page.locator("#checkpointRetention").count()) === 1, "autoregressive checkpoint controls missing");
+await page.locator('[data-action="startTask"]').first().click();
+const createdTaskText = await page.locator("#modal").innerText();
+const createdTaskId = createdTaskText.match(/PT-\d{8}-\d{3}/)?.[0];
+await page.locator('[data-action="confirmModal"]').click();
+check(Boolean(createdTaskId), "new task modal did not expose task ID");
+check((await page.locator("#monitorTaskId").textContent()) === createdTaskId, "monitor did not open the newly created task");
+check((await page.locator("#modalBackdrop.open").count()) === 0, "confirm left modal overlay visible");
+
+// Seq2Seq pretraining/downstream and fine-tuning parameters are operational.
+await page.locator('[data-page="seq2seq"]').first().click();
+await page.locator('[data-section="0"]').click();
+check((await page.locator("#seqLearningRate").count()) === 1 && (await page.locator("#seqBatch").count()) === 1 && (await page.locator("#seqEpochs").count()) === 1, "Seq2Seq pretraining parameters missing");
+await page.locator('[data-action="applySeqPreset"]').click();
+check((await page.locator("#seqEpochs").inputValue()) === "12", "Seq2Seq preset did not apply");
+await page.locator('[data-section="4"]').click();
+check((await page.locator("#downstreamCheckpoint option").count()) >= 3, "downstream checkpoint selection missing");
+check((await page.locator("#downstreamOptimizer").count()) === 1 && (await page.locator("#downstreamBatchEpochs").count()) === 1, "downstream hyperparameters missing");
+await page.locator('[data-downstream-type="文本摘要"]').check();
+check((await page.locator("#downstreamDataset").inputValue()) === "summary_train.jsonl", "downstream task switch did not link the dataset");
+check((await page.locator("#downstreamPreset").inputValue()) === "长文本摘要", "downstream task switch did not link the parameter preset");
+await page.locator("#testInput").fill("请概括：第一份输入强调训练吞吐。");
+await page.locator('[data-action="generateTest"]').click();
+const downstreamOutputBefore = await page.locator("#testOutput").innerText();
+await page.locator("#testInput").fill("请概括：第二份输入强调部署延迟和稳定性。");
+await page.locator('[data-action="generateTest"]').click();
+check((await page.locator("#testOutput").innerText()) !== downstreamOutputBefore, "downstream online test returned the same output for different inputs");
+await page.locator('[data-page="finetune"]').first().click();
+await page.locator('[data-section="0"]').click();
+check((await page.locator('[name="finetuneModel"]').count()) === 3, "fine-tuning model inspector cards missing");
+check((await page.locator("#finetuneEpochs").count()) === 1 && (await page.locator("#finetuneLearningRate").count()) === 1 && (await page.locator("#finetuneBatch").count()) === 1, "fine-tuning core parameters missing");
+await page.locator('[data-action="applyFinetuneRecommendation"]').click();
+check((await page.locator("#finetuneEpochs").inputValue()) === "4", "fine-tuning recommendation did not update parameters");
+
+// Task detail includes config, logs, timeline and exact log export.
+await page.locator('[data-page="tasks"]').first().click();
+await page.locator('[data-task-action="detail"]').first().click();
+check(await page.locator("#taskDetailPanel").isVisible(), "task detail panel did not open");
+check((await page.locator("#taskConfigJson").innerText()).includes("framework"), "task detail lacks submitted configuration");
+check((await page.locator("#taskTimeline .timeline-item").count()) >= 3, "task detail lacks status timeline");
+await page.locator("#taskLogLevel").selectOption("WARNING");
+await page.locator('[data-action="filterTaskLogs"]').click();
+check((await page.locator("#taskDetailLogs").innerText()).includes("WARNING"), "task log level filter failed");
+const taskLogDownloadPromise = page.waitForEvent("download");
+await page.locator('[data-action="exportTaskLogs"]').first().click();
+const taskLogDownload = await taskLogDownloadPromise;
+check(taskLogDownload.suggestedFilename().endsWith("-logs.txt"), "task log export downloaded the wrong artifact");
+await page.locator("#taskSearch").fill("definitely-not-a-task");
+await page.locator('[data-action="filterTasks"]').click();
+check(await page.locator("#taskEmpty").isVisible(), "task filters lack an explicit empty state");
+await page.locator('[data-action="clearTaskFilters"]').click();
+
+// Evaluation linkage, completed-task comparison and custom dataset metadata.
+await page.locator('[data-page="evaluation"]').first().click();
+await page.locator('[data-section="0"]').click();
+await page.locator('[data-model-type="多模态模型"]').click();
+check((await page.locator("#evalDataset").textContent()).includes("MMBench"), "multimodal type did not update evaluation datasets");
+await page.locator('[data-section="3"]').click();
+await page.locator('[data-compare-model="GLM"]').check();
+await page.locator('[data-action="runModelComparison"]').click();
+check((await page.locator("#compareHead th").count()) === 5, "model comparison did not generate dynamic columns");
+await page.locator('[data-section="4"]').click();
+await page.locator('[data-action="openDatasetUpload"]').click();
+check(await page.locator("#datasetUploadPanel").isVisible(), "custom dataset metadata editor did not open");
+check((await page.locator("#datasetName").count()) === 1 && (await page.locator("#datasetInputMap").count()) === 1, "custom dataset metadata/schema controls missing");
+const invalidDatasetChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="evaluation-dataset"]').click();
+const invalidDatasetChooser = await invalidDatasetChooserPromise;
+await invalidDatasetChooser.setFiles({
+  name: "wrong-schema.jsonl",
+  mimeType: "application/x-ndjson",
+  buffer: Buffer.from('{"foo":"bar"}\n{"foo":"baz"}'),
+});
+await page.waitForTimeout(30);
+await page.locator('[data-action="confirmModal"]').click();
+const customDatasetCountBefore = await page.locator("#customDatasetRows tr").count();
+await page.locator('[data-action="saveDatasetUpload"]').click();
+check((await page.locator("#customDatasetRows tr").count()) === customDatasetCountBefore, "custom dataset accepted records missing mapped Schema fields");
+check(await page.locator("#datasetUploadPanel").isVisible(), "Schema failure closed the dataset editor instead of allowing correction");
+const validDatasetChooserPromise = page.waitForEvent("filechooser");
+await page.locator('[data-action="upload"][data-context="evaluation-dataset"]').click();
+const validDatasetChooser = await validDatasetChooserPromise;
+await validDatasetChooser.setFiles({
+  name: "valid-schema.jsonl",
+  mimeType: "application/x-ndjson",
+  buffer: Buffer.from('{"prompt":"Q1","label":"A1"}\n{"prompt":"Q2","label":"A2"}'),
+});
+await page.waitForTimeout(30);
+await page.locator('[data-action="confirmModal"]').click();
+await page.locator('[data-action="saveDatasetUpload"]').click();
+check((await page.locator("#customDatasetRows tr").count()) === customDatasetCountBefore + 1, "custom dataset with valid mapped fields was not saved");
+check(!(await page.locator("#datasetUploadPanel").isVisible()), "valid dataset save left editor open");
+await page.locator('[data-section="5"]').click();
+check((await page.locator(".metric-guide").count()) >= 3, "metric library lacks explanation/formula/range rows");
+
+// Delivery and service management are visible, editable workflows.
+await page.locator('[data-page="inference"]').first().click();
+await page.locator('[data-section="0"]').click();
+check((await page.locator("#modelScenario").count()) === 1 && (await page.locator("#modelModality").count()) === 1 && (await page.locator("#modelCreator").count()) === 1 && (await page.locator("#modelSort").count()) === 1, "inference model filter dimensions missing");
+await page.locator('[data-action="generateSelectedModels"]').click();
+check((await page.locator("#parallelOutputs .model-card").count()) === 2, "2–4 model experience did not use selected models");
+check((await page.locator("#experienceLogRows tr").first().innerText()).includes("temperature"), "experience log lacks full parameters");
+await page.locator('[data-section="1"]').click();
+check((await page.locator("#calibrationDataset").count()) === 1 && (await page.locator("#compressionAdvanced").count()) === 1, "delivery compression parameters missing");
+check((await page.locator("#deliveryEvalDataset").count()) === 1 && (await page.locator("#containerLimits").count()) === 1, "delivery evaluation dataset or CPU/memory limits missing");
+await page.locator('[data-action="monitorService"]').click();
+check(await page.locator("#deliveryMonitorPanel").isVisible(), "delivery monitoring panel did not open visibly");
+check((await page.locator("#deliveryMonitorPanel .metric").count()) === 4, "delivery monitoring lacks resource/QPS/error metrics");
+await page.locator('[data-section="2"]').click();
+await page.locator('[data-route-action="version"]').first().click();
+check((await page.locator("#routeRows tr").first().innerText()).includes("v4"), "route version did not increment from v3 to v4");
+check(!(await page.locator("#routeRows tr").first().innerText()).includes("vNaN"), "route version became vNaN");
+await page.locator('[data-action="editCredential"]').first().click();
+await page.locator("#credentialScopeEdit").fill("only.audit.read");
+await page.locator('[data-action="confirmModal"]').click();
+check((await page.locator("#credentialRows tr").first().innerText()).includes("only.audit.read"), "credential permission edit did not persist in the list");
+const routeCountBefore = await page.locator("#routeRows tr").count();
+await page.locator('[data-action="newRoute"]').click();
+await page.locator("#apiRoute").fill("/v1/qa-route");
+await page.locator('[data-action="saveRoute"]').click();
+check((await page.locator("#routeRows tr").count()) === routeCountBefore + 1, "route create did not update table");
+await page.locator('[data-route-action="edit"]').last().click();
+await page.locator("#routeScope").fill("qa.invoke");
+await page.locator('[data-action="saveRoute"]').click();
+check((await page.locator("#routeRows").innerText()).includes("qa.invoke"), "route edit did not persist permissions");
+const stepCountBefore = await page.locator("[data-orchestration-index]").count();
+await page.locator('[data-action="addOrchestrationStep"]').click();
+check((await page.locator("[data-orchestration-index]").count()) === stepCountBefore + 1, "orchestration step create failed");
+await page.locator('[data-action="runOrchestration"]').first().click();
+check((await page.locator("#serviceDetailRows").innerText()).includes("ORCH-"), "orchestration run did not create/show instances");
+await page.locator('[data-action="auditLogs"]').first().click();
+check((await page.locator("#serviceDetailHead").innerText()).includes("请求参数"), "service audit log lacks request parameters");
+
+// Documentation has a real reader and broad API contract.
+await page.locator('[data-page="docs"]').first().click();
+await page.locator('[data-doc-section="configuration"]').first().click();
+check((await page.locator("#docReader").innerText()).includes("检查点"), "document reader did not navigate to real section content");
+check((await page.locator(".api-list .endpoint").count()) >= 8, "API reference lacks endpoint coverage");
+check((await page.locator("#apiParams tr").count()) >= 4, "API reference lacks parameter details");
+await page.locator('[data-code-lang="python"]').click();
+const pythonApiCode = await page.locator("#apiCode").innerText();
+check(pythonApiCode.includes("\n") && !pythonApiCode.includes("\\n"), "Python API example contains literal escaped newlines");
+check(pythonApiCode.split("\n").length >= 3, "Python API example is not formatted as runnable multiline code");
 
 // Mobile navigation: scrim, focus trap, aria-expanded reset and no overflow.
 await page.setViewportSize({ width: 390, height: 844 });
