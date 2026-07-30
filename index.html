@@ -281,6 +281,64 @@
       .coverage-group.open .coverage-body { grid-template-columns: 1fr; padding-left: 18px; }
       .workflow { justify-content: start; }
     }
+    /* === Algorithm Service Page Styles === */
+    .sub-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+    .sub-tab { height: 38px; border: 0; background: transparent; padding: 0 14px; color: #718096; white-space: nowrap; border-bottom: 2px solid transparent; font-size: 13px; }
+    .sub-tab.active { color: var(--primary); border-color: var(--primary); font-weight: 600; }
+    .tree-nav { border: 1px solid var(--line); border-radius: 7px; background: #fff; overflow: hidden; max-height: 520px; overflow-y: auto; }
+    .tree-group { border-bottom: 1px solid #edf1f6; }
+    .tree-group:last-child { border-bottom: 0; }
+    .tree-head { padding: 10px 14px; font-size: 12px; font-weight: 650; color: var(--ink); cursor: pointer; display: flex; align-items: center; gap: 7px; user-select: none; }
+    .tree-head:hover { background: #f7f9fc; }
+    .tree-head .arrow { transition: .15s ease; font-size: 10px; color: var(--muted); }
+    .tree-group.collapsed .tree-head .arrow { transform: rotate(-90deg); }
+    .tree-body { display: block; }
+    .tree-group.collapsed .tree-body { display: none; }
+    .tree-item { padding: 8px 14px 8px 32px; font-size: 12px; color: #5d6c82; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+    .tree-item:hover { background: var(--primary-soft); color: var(--primary); }
+    .tree-item.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+    .code-block { background: #1a2738; color: #c9d7ea; border-radius: 7px; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; white-space: pre; position: relative; }
+    .code-block .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,.12); border: 0; color: #c9d7ea; border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+    .code-block .copy-btn:hover { background: rgba(255,255,255,.22); }
+    .algo-card { padding: 16px; display: flex; flex-direction: column; min-height: 160px; transition: .18s ease; cursor: pointer; }
+    .algo-card:hover { border-color: #bad1f5; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(39,83,145,.08); }
+    .algo-card .algo-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .algo-card .algo-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 7px; background: var(--primary-soft); color: var(--primary); flex: none; }
+    .algo-card h3 { margin: 0; font-size: 14px; color: var(--ink); }
+    .algo-card .algo-desc { color: var(--muted); font-size: 12px; line-height: 1.55; flex: 1; }
+    .detail-panel { border: 1px solid var(--line); border-radius: 7px; background: #fff; padding: 18px; }
+    .detail-panel h3 { margin: 0 0 4px; color: var(--ink); font-size: 15px; }
+    .conf-bar { height: 8px; border-radius: 4px; background: #edf1f6; overflow: hidden; margin-top: 6px; }
+    .conf-bar i { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+    .tag-input { min-height: 38px; border: 1px solid #dce4ef; border-radius: 7px; padding: 5px 8px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; background: #fff; }
+    .tag-input input { border: 0; outline: 0; flex: 1; min-width: 80px; font-size: 13px; }
+    .var-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 5px; background: #eaf3ff; color: var(--primary); font-size: 12px; font-family: monospace; }
+    .doc-layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; min-height: 400px; }
+    .doc-side { border-right: 1px solid var(--line); background: #f9fbfd; padding: 12px 0; overflow-y: auto; max-height: 520px; }
+    .doc-content { padding: 18px 22px; overflow-y: auto; max-height: 520px; }
+    .doc-content h3 { color: var(--ink); font-size: 15px; margin: 0 0 10px; }
+    .doc-content h4 { color: var(--ink); font-size: 13px; margin: 16px 0 7px; }
+    .doc-content p { color: var(--text); line-height: 1.75; font-size: 13px; margin: 0 0 10px; }
+    .doc-content ul { color: var(--text); font-size: 13px; line-height: 1.8; padding-left: 18px; margin: 0 0 10px; }
+    .api-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #edf1f6; font-size: 12px; }
+    .api-row:last-child { border-bottom: 0; }
+    .api-row label { color: var(--muted); }
+    .api-row span { color: var(--ink); }
+    .inline-search { height: 34px; border: 1px solid #dce4ef; border-radius: 7px; padding: 0 11px; background: #fff; color: var(--ink); outline: none; font-size: 13px; }
+    .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; }
+    .result-stat { padding: 14px; border: 1px solid var(--line); border-radius: 7px; background: #fff; text-align: center; }
+    .result-stat .num { font-size: 22px; font-weight: 750; color: var(--ink); }
+    .result-stat .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .result-stat.best { border-color: var(--green); background: #f0fdf5; }
+    .result-stat.best .num { color: var(--green); }
+    .seg-control { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+    .seg-btn { padding: 6px 14px; border: 0; background: #fff; color: #718096; font-size: 12px; cursor: pointer; }
+    .seg-btn.active { background: var(--primary); color: #fff; }
+    .preview-box { border: 1px solid var(--line); border-radius: 7px; background: #f9fbfd; padding: 14px; font-size: 13px; line-height: 1.7; color: var(--text); }
+    .diff-add { background: #e7f8f0; color: #11855a; padding: 1px 3px; border-radius: 3px; }
+    .diff-del { background: #ffedef; color: #c8313c; padding: 1px 3px; border-radius: 3px; text-decoration: line-through; }
+    .radar-chart { width: 200px; height: 200px; margin: 0 auto; }
+    .weight-bar { display: grid; grid-template-columns: 80px 1fr 36px; gap: 8px; align-items: center; margin: 8px 0; }
   </style>
 </head>
 <body>
@@ -363,7 +421,60 @@
       {name:'EduMind-MoE', version:'v1.2.0', type:'教育模型', size:'32B', state:'评测中', desc:'覆盖理工文医多学科的教育认知与推理模型。'},
       {name:'VisionFusion', version:'v1.0.3', type:'多模态', size:'12B', state:'可用', desc:'支持跨模态特征对齐、图文理解和图文生成。'}
     ];
-    const state = { page:'overview', trainingTab:'basic', algoTab:'prompt', taskFilter:'全部' };
+    /* === Algorithm Service Data === */
+    const graphAlgos = [
+      {name:'GCN',cat:'gnn',desc:'图卷积网络，通过谱图卷积进行节点特征聚合，适用于节点分类与链路预测。',task:'节点分类 / 链路预测',paper:'Kipf & Welling, 2017'},
+      {name:'GAT',cat:'gnn',desc:'图注意力网络，利用注意力机制为不同邻居分配不同权重，提升关键节点特征捕获。',task:'节点分类',paper:'Veličković et al., 2018'},
+      {name:'GraphSAGE',cat:'gnn',desc:'归纳式图学习，通过采样邻居和聚合函数生成节点嵌入，支持大规模图。',task:'节点分类 / 链路预测',paper:'Hamilton et al., 2017'},
+      {name:'FastGCN',cat:'gnn',desc:'快速图卷积网络，通过重要性采样加速训练，适合大规模图。',task:'节点分类',paper:'Chen et al., 2018'},
+      {name:'GIN',cat:'gnn',desc:'图同构网络，理论上是目前最具表达能力的GNN，适用于图分类。',task:'图分类',paper:'Xu et al., 2019'},
+      {name:'DGK',cat:'unsup',desc:'深度图核，通过子结构枚举和核函数进行图级相似度计算。',task:'图分类 / 图相似度',paper:'Yanardag & Vishwanathan, 2015'},
+      {name:'Graph2vec',cat:'unsup',desc:'图级表示学习，借鉴doc2vec思想生成整图嵌入向量。',task:'图分类 / 图相似度',paper:'Narayanan et al., 2017'},
+      {name:'InfoGraph',cat:'unsup',desc:'基于互信息最大化的无监督图级表示学习方法。',task:'图分类',paper:'Sun et al., 2019'},
+      {name:'Patchy-SAN',cat:'sup',desc:'将图结构转化为序列，利用CNN进行图分类。',task:'图分类',paper:'Niepert et al., 2016'},
+      {name:'DGCNN',cat:'sup',desc:'扩散图卷积神经网络，利用扩散过程改进信息传播。',task:'图分类',paper:'Zhuang & Ma, 2018'},
+      {name:'SortPool',cat:'sup',desc:'通过排序池化层将图节点排列为序列，实现端到端图分类。',task:'图分类',paper:'Zhang et al., 2018'},
+      {name:'DiffPool',cat:'sup',desc:'可微池化层，通过层次化聚类学习图的层次表示。',task:'图分类',paper:'Ying et al., 2018'}
+    ];
+    const graphExps = [
+      {id:'GE-001',name:'基于GCN的论文引用分类',algo:'GCN',status:'已完成',acc:'92.3%',time:'12m',date:'2026-07-28'},
+      {id:'GE-002',name:'GAT节点特征学习实验',algo:'GAT',status:'运行中',acc:'--',time:'8m',date:'2026-07-30'},
+      {id:'GE-003',name:'GraphSAGE链路预测',algo:'GraphSAGE',status:'已完成',acc:'88.7%',time:'22m',date:'2026-07-26'},
+      {id:'GE-004',name:'GIN图分类基准测试',algo:'GIN',status:'失败',acc:'--',time:'5m',date:'2026-07-25'},
+      {id:'GE-005',name:'Graph2vec图相似度计算',algo:'Graph2vec',status:'已完成',acc:'85.1%',time:'15m',date:'2026-07-24'}
+    ];
+    const graphModels = [
+      {name:'GraphMAE-Cora',task:'边对比预测',date:'2026-07-28',metrics:'Acc 92.3% / F1 91.1%'},
+      {name:'GraphCL-PubMed',task:'子图对比预测',date:'2026-07-26',metrics:'Acc 89.6% / F1 87.8%'},
+      {name:'GAT-CiteSeer',task:'边对比预测',date:'2026-07-22',metrics:'Acc 71.2% / F1 69.8%'}
+    ];
+    const promptTemplates = [
+      {name:'科技情报抽取模板',cat:'信息抽取',tags:['JSON','实体','关系'],score:86.7,model:'Qwen2.5-7B',ver:'v3'},
+      {name:'学术论文摘要生成',cat:'文本生成',tags:['摘要','学术'],score:91.2,model:'GLM-4-9B',ver:'v2'},
+      {name:'多轮对话角色扮演',cat:'对话生成',tags:['角色','多轮'],score:84.5,model:'DeepSeek-V3',ver:'v1'},
+      {name:'代码审查助手',cat:'代码生成',tags:['Code','Review'],score:88.9,model:'Qwen2.5-7B',ver:'v4'},
+      {name:'中英翻译专家',cat:'翻译',tags:['中英','翻译'],score:93.1,model:'GLM-4-9B',ver:'v2'}
+    ];
+    const fewshotModels = [
+      {name:'Prototypical Networks',cat:'度量学习',desc:'通过计算查询样本到各类原型的距离进行分类，核心原理为对支持集样本取均值构建类原型，再用最近邻分类。',scenario:'少样本分类、快速领域适配',params:'5-way 5-shot',ref:'Snell et al., 2017',link:'https://arxiv.org/abs/1703.05175'},
+      {name:'Matching Networks',cat:'度量学习',desc:'利用注意力机制对支持集样本进行加权匹配，核心原理为基于双向 LSTM 与 cosine 注意力的非参数度量。',scenario:'动态类别、小规模标注数据',params:'5-way 1-shot',ref:'Vinyals et al., 2016',link:'https://arxiv.org/abs/1606.04080'},
+      {name:'Relation Network',cat:'度量学习',desc:'通过可学习的非线性关系模块计算样本对之间的相似度，核心原理为用 CNN/MLP 替代固定距离度量。',scenario:'文本分类、图文匹配',params:'5-way 5-shot',ref:'Sung et al., 2018',link:'https://arxiv.org/abs/1711.06025'},
+      {name:'MAML',cat:'优化学习',desc:'模型无关元学习，通过梯度元学习寻找好的初始化参数，核心原理为在任务分布上优化初始化使其经几步梯度下降即可适应新任务。',scenario:'快速适应新任务、跨领域迁移',params:'5-way 5-shot',ref:'Finn et al., 2017',link:'https://arxiv.org/abs/1703.03400'},
+      {name:'Reptile',cat:'优化学习',desc:'简化版元学习算法，通过多次采样任务的最近梯度更新寻找接近所有任务的参数，核心原理为一阶近似 MAML。',scenario:'资源受限场景、快速原型验证',params:'5-way 5-shot',ref:'Nichol et al., 2018',link:'https://arxiv.org/abs/1803.02999'},
+      {name:'Meta-SGD',cat:'元学习',desc:'在 MAML 基础上学习学习率与更新方向，核心原理为将元学习扩展至学习更新步长和方向向量。',scenario:'灵活元学习、收敛速度优化',params:'5-way 5-shot',ref:'Li et al., 2017',link:'https://arxiv.org/abs/1709.04918'}
+    ];
+    const fewshotEvalTasks = [
+      {id:'FE-001',name:'5-way 5-shot 图像分类',dataset:'miniImageNet',protocol:'5-way 5-shot',models:'ProtoNet / MAML / RelationNet',status:'已完成',acc:'62.4% / 48.7% / 50.4%'},
+      {id:'FE-002',name:'5-way 1-shot 文本分类',dataset:'tieredImageNet',protocol:'5-way 1-shot',models:'MatchingNet / Meta-SGD',status:'运行中',acc:'--'},
+      {id:'FE-003',name:'5-way 5-shot 图文匹配',dataset:'自定义数据集',protocol:'5-way 5-shot',models:'RelationNet',status:'已完成',acc:'78.2%'}
+    ];
+    const algoTabs = [
+      {id:'graph',label:'图计算算法工具集'},
+      {id:'prompt',label:'提示学习算法'},
+      {id:'reverse',label:'反向提示算法'},
+      {id:'fewshot',label:'小样本学习算法'}
+    ];
+    const state = { page:'overview', trainingTab:'basic', algoTab:'graph', algoSub:'pretrain', algoGraphItem:'', algoPromptItem:'', algoFewItem:'', algoFewCat:'metric', taskFilter:'全部' };
     const $ = (s, root=document) => root.querySelector(s);
     const $$ = (s, root=document) => [...root.querySelectorAll(s)];
     const icon = (name, size=18) => `<svg class="ico" width="${size}" height="${size}"><use href="#i-${name}"/></svg>`;
@@ -463,14 +574,646 @@
       return pageShell('推理与部署','打通模型压缩、格式转换、质量测评、部署发布和服务运营。',`<button class="btn">API 文档</button><button class="btn primary" data-action="createService">${icon('plus')}发布服务</button>`,body,'推理引擎');
     }
     function algorithms() {
-      const tabs = [{id:'prompt',label:'提示学习'},{id:'reverse',label:'反向提示'},{id:'fewshot',label:'小样本学习'},{id:'graph',label:'图计算算法'}];
-      const prompt = `<div class="split"><div class="card card-pad"><div class="form-row"><label>提示模板编辑器</label><textarea class="field" id="promptText" rows="9">你是一名科技情报分析专家。请根据以下材料提取关键技术、研究机构与潜在趋势，并以 JSON 格式输出。\n\n材料：{{input}}</textarea></div><div style="display:flex;align-items:center;gap:8px;margin-top:12px"><span class="badge blue">变量 {{input}}</span><span class="badge">版本 v3</span><button class="btn small primary" style="margin-left:auto" data-action="optimizePrompt">智能优化</button></div></div><div class="card card-pad"><div class="section-head"><h2>模板配置</h2></div><div class="summary-list"><div class="summary-row"><span>目标模型</span><b>Qwen2.5-7B</b></div><div class="summary-row"><span>任务类型</span><b>信息抽取</b></div><div class="summary-row"><span>优化策略</span><b>指令重构 + 示例增强</b></div><div class="summary-row"><span>当前评分</span><b style="color:var(--green)">86.7</b></div></div><button class="btn" style="width:100%;margin-top:17px" data-action="testPrompt">运行测试</button></div></div>`;
-      const reverse = `<div class="split"><div class="card card-pad"><div class="form-row"><label>模型生成文本 <span id="charCount" style="float:right;color:var(--muted)">0 字</span></label><textarea class="field" id="reverseText" rows="10" placeholder="粘贴待分析的模型生成文本，系统将反向推断可能的提示结构与指令意图。"></textarea></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn" data-action="loadExample">加载示例</button><button class="btn ghost" data-action="clearReverse">清空</button><button class="btn primary" style="margin-left:auto" data-action="analyzeReverse">开始分析</button></div></div><div class="card card-pad" id="reverseResult"><div class="empty">分析结果将在这里展示<br><small>包含提示词重构、关键指令、意图分类和置信度</small></div></div></div>`;
-      const fewshot = `<div class="grid cols-3"><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('algo')}</div><h3>Prototypical Networks</h3></div><p>度量学习 · 适用于少样本分类与快速领域适配。</p><div class="chips"><span class="chip">5-way</span><span class="chip">5-shot</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon" style="color:var(--green);background:#e9faf2">${icon('algo')}</div><h3>Matching Networks</h3></div><p>注意力匹配 · 适用于动态类别与小规模标注数据。</p><div class="chips"><span class="chip">Metric-based</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon" style="color:var(--amber);background:#fff5df">${icon('algo')}</div><h3>Relation Network</h3></div><p>关系学习 · 支持文本分类、图文匹配等下游任务。</p><div class="chips"><span class="chip">已配置</span><span class="chip">92.4% Acc</span></div></article></div><section class="section card card-pad"><div class="section-head"><h2>标准化评估基准</h2><button class="btn small primary right">新建评估</button></div>${taskTable(tasks.filter(t=>t.type==='自动测评'))}</section>`;
-      const graph = `<div class="grid cols-3"><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('model')}</div><h3>图预训练框架</h3></div><p>配置图数据集、编码器、预训练目标和分布式训练资源。</p><div class="chips"><span class="chip">GraphMAE</span><span class="chip">GraphCL</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('algo')}</div><h3>图学习算法库</h3></div><p>按任务类型检索并配置节点分类、链路预测与图分类算法。</p><div class="chips"><span class="chip">GCN</span><span class="chip">GAT</span><span class="chip">GraphSAGE</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('chart')}</div><h3>实验结果分析</h3></div><p>对比性能指标、训练曲线、嵌入空间与错误样本。</p><div class="chips"><span class="chip">可视化</span><span class="chip">报告导出</span></div></article></div>`;
-      const panels = {prompt, reverse, fewshot, graph};
-      const body = `<div class="tabs">${tabs.map(t=>`<button class="tab ${state.algoTab===t.id?'active':''}" data-algo-tab="${t.id}">${t.label}</button>`).join('')}</div>${panels[state.algoTab]}`;
-      return pageShell('大模型算法服务','图计算、提示学习、反向提示与小样本学习算法的一站式实验工作台。',`<button class="btn">算法文档</button><button class="btn primary" data-action="saveAlgo">${icon('plus')}保存实验</button>`,body,'大模型算法服务');
+      const body = `<div class="tabs">${algoTabs.map(t=>`<button class="tab ${state.algoTab===t.id?'active':''}" data-algo-tab="${t.id}">${t.label}</button>`).join('')}</div>${{graph:algoGraph,prompt:algoPrompt,reverse:algoReverse,fewshot:algoFewshot}[state.algoTab]()}`;
+      return pageShell('大模型算法服务','图计算、提示学习、反向提示与小样本学习算法的一站式实验工作台。',`<button class="btn" data-action="openChecklist">需规核对书</button><button class="btn" data-action="algoDocs">算法文档</button><button class="btn primary" data-action="saveAlgo">${icon('plus')}保存实验</button>`,body,'大模型算法服务');
+    }
+    /* === 图计算算法工具集 === */
+    function algoGraph() {
+      const subs = [{id:'pretrain',label:'预训练框架构建'},{id:'algolib',label:'图学习算法库'},{id:'docs',label:'技术文档与开发支持'}];
+      const pretrain = `
+        <div class="grid cols-4">
+          <div class="card stat" style="--tint:#e9f3ff"><div class="stat-label">预训练任务</div><div class="stat-value">3</div><div class="stat-meta">1 个运行中</div></div>
+          <div class="card stat" style="--tint:#e9faf2"><div class="stat-label">已保存模型</div><div class="stat-value">3</div><div class="stat-meta">可导出</div></div>
+          <div class="card stat" style="--tint:#fff5df"><div class="stat-label">GPU 使用</div><div class="stat-value">4/8</div><div class="stat-meta">H800</div></div>
+          <div class="card stat" style="--tint:#f1edff"><div class="stat-label">平均训练时长</div><div class="stat-value">18m</div><div class="stat-meta">正常</div></div>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>预训练任务配置</h2><p>数据源接入 · 任务类型选择 · 采样策略配置</p><button class="btn small primary right" data-action="graphStartTrain">${icon('plus')}新建预训练任务</button></div>
+          <div class="split">
+            <div class="card card-pad">
+              <div class="form-grid">
+                <div class="form-row"><label>数据源选择</label><select class="field" id="graphDataSource"><option>Cora 论文引用图（CSV边表）</option><option>PubMed 引用网络</option><option>CiteSeer 文献图</option><option value="api">通过 API 对接外部数据源</option></select></div>
+                <div class="form-row full" id="graphApiConfig" style="display:none"><div class="preview-box" style="padding:10px"><b>外部数据源 API 配置</b><div class="form-grid" style="margin-top:8px"><input class="field" placeholder="API 地址 (https://...)" value="https://data.example.com/api/graph"><input class="field" placeholder="API Key" value="sk-xxxx"><select class="field"><option>认证方式：Bearer Token</option><option>认证方式：API Key</option></select><button class="btn small primary" data-action="graphTestApi">测试连接</button></div></div></div>
+                <div class="form-row"><label>任务类型</label><select class="field" id="graphTaskType"><option value="edge">边对比预测</option><option value="subgraph">子图对比预测</option></select></div>
+                <div class="form-row full" id="graphDataSummary">
+                  <div class="preview-box"><b>图结构摘要</b><br>节点数：2,708 · 边数：5,429 · 特征维度：1,433 · 类别数：7<br><small style="color:var(--muted)">系统已自动解析图结构并展示基础信息（CSV边表、节点特征文件均支持自动解析）</small></div>
+                </div>
+                <div class="form-row"><label>负采样策略</label><select class="field"><option>随机采样</option><option>硬负样本挖掘</option></select></div>
+                <div class="form-row"><label>批次采样大小</label><input class="field" type="number" value="512"></div>
+              </div>
+              <div id="graphTaskHint" class="preview-box" style="margin-top:12px"><b>边对比预测</b><br><small>通过对比正样本边和负采样边学习节点表示，适用于链路预测和节点分类等下游任务。</small></div>
+            </div>
+            <div class="card card-pad">
+              <div class="section-head"><h2>模型参数配置</h2></div>
+              <div class="form-grid">
+                <div class="form-row full"><label>图神经网络编码器</label><div style="display:flex;gap:8px"><select class="field" id="graphEncoder" style="flex:1"><option>GCN — 图卷积网络</option><option>GAT — 图注意力网络</option><option>GraphSAGE — 归纳式图学习</option></select><button class="btn small" data-action="graphEncoderDetail">查看结构示意图</button></div></div>
+                <div class="form-row"><label>网络层数</label><input class="field" type="number" value="2"></div>
+                <div class="form-row"><label>隐藏单元维度</label><input class="field" type="number" value="64"></div>
+                <div class="form-row"><label>激活函数</label><select class="field"><option>ReLU</option><option>LeakyReLU</option><option>ELU</option></select></div>
+                <div class="form-row"><label>Dropout 比例</label><input class="field" value="0.5"></div>
+                <div class="form-row"><label>损失函数</label><select class="field"><option>InfoNCE Loss</option><option>CrossEntropy</option></select></div>
+                <div class="form-row"><label>优化器</label><select class="field"><option>Adam</option><option>SGD</option><option>AdamW</option></select></div>
+                <div class="form-row"><label>学习率</label><input class="field" value="0.01"></div>
+                <div class="form-row"><label>权重衰减</label><input class="field" value="5e-4"></div>
+              </div>
+              <button class="btn primary" style="width:100%;margin-top:14px" data-action="graphStartTrain">开始训练</button>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>训练任务监控与可视化</h2><p>实时指标 · 资源使用 · 训练日志</p><div class="right"><span class="badge green"><span class="dot" style="width:5px;height:5px;box-shadow:none"></span>训练中</span> <button class="btn small" data-action="graphPause">暂停</button> <button class="btn small danger" data-action="graphStop">停止</button></div></div>
+          <div class="grid cols-2">
+            <div class="card card-pad"><div class="section-head"><h2>损失函数值</h2></div>${lineChart()}</div>
+            <div class="card card-pad"><div class="section-head"><h2>学习率变化曲线</h2></div>${lineChart()}</div>
+          </div>
+          <div class="card card-pad" style="margin-top:16px"><div class="section-head"><h2>资源使用监控</h2></div>
+              <div class="metric-row"><span>GPU 使用率</span><div class="metric-bar"><i style="--value:78%;--color:var(--cyan)"></i></div><b>78%</b></div>
+              <div class="metric-row"><span>CPU 使用率</span><div class="metric-bar"><i style="--value:45%;--color:var(--green)"></i></div><b>45%</b></div>
+              <div class="metric-row"><span>内存消耗</span><div class="metric-bar"><i style="--value:62%;--color:var(--amber)"></i></div><b>62%</b></div>
+              <div class="metric-row"><span>学习率</span><div class="metric-bar"><i style="--value:30%;--color:var(--primary)"></i></div><b>0.003</b></div>
+            </div>
+          </div>
+          <div class="card card-pad" style="margin-top:16px"><div class="section-head"><h2>训练日志</h2><button class="btn small right">导出日志</button></div><div class="log">[14:22:08] Graph data loaded: Cora dataset (2708 nodes, 5429 edges)
+[14:22:11] Encoder: GCN, layers=2, hidden=64, dropout=0.5
+[14:22:15] Training started: Epoch 1/200, lr=0.01
+[14:23:32] Epoch 50/200 · loss 1.842 · val_acc 0.821
+[14:24:48] Epoch 100/200 · loss 1.234 · val_acc 0.876
+[14:25:52] Epoch 150/200 · loss 0.892 · val_acc 0.901
+[14:26:38] Checkpoint saved at epoch 150</div></div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>模型管理与导出</h2><button class="btn small right" data-action="graphExportModel">导出选中模型</button></div>
+          <div class="table-wrap"><table><thead><tr><th>模型名称</th><th>预训练任务</th><th>创建时间</th><th>性能指标</th><th>操作</th></tr></thead><tbody>
+            ${graphModels.map(m=>`<tr><td class="table-title">${m.name}</td><td>${m.task}</td><td>${m.date}</td><td>${m.metrics}</td><td><div class="actions"><button class="link" data-action="graphModelDetail" data-name="${m.name}">详情</button><button class="link" data-action="graphExportOne" data-name="${m.name}">导出</button></div></td></tr>`).join('')}
+          </tbody></table></div>
+        </section>`;
+      const algolib = `
+        <div class="split">
+          <div class="card" style="padding:0">
+            <div class="card-pad section-head" style="margin:0"><h2>算法分类导航</h2></div>
+            <div class="tree-nav" style="border:0;border-radius:0">
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>图神经网络（GNN）</div><div class="tree-body">
+                ${graphAlgos.filter(a=>a.cat==='gnn').map(a=>`<div class="tree-item ${state.algoGraphItem===a.name?'active':''}" data-graph-algo="${a.name}">${icon('algo',14)} ${a.name}</div>`).join('')}
+              </div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>无监督图表示学习</div><div class="tree-body">
+                ${graphAlgos.filter(a=>a.cat==='unsup').map(a=>`<div class="tree-item ${state.algoGraphItem===a.name?'active':''}" data-graph-algo="${a.name}">${icon('algo',14)} ${a.name}</div>`).join('')}
+              </div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>有监督图表示学习</div><div class="tree-body">
+                ${graphAlgos.filter(a=>a.cat==='sup').map(a=>`<div class="tree-item ${state.algoGraphItem===a.name?'active':''}" data-graph-algo="${a.name}">${icon('algo',14)} ${a.name}</div>`).join('')}
+              </div></div>
+            </div>
+          </div>
+          <div>
+            ${state.algoGraphItem ? (() => {
+              const a = graphAlgos.find(x=>x.name===state.algoGraphItem);
+              return `<div class="detail-panel"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="algo-icon" style="width:36px;height:36px">${icon('algo',20)}</div><div><h3>${a.name}</h3><span class="table-sub">${a.paper}</span></div><button class="btn small primary" style="margin-left:auto" data-action="graphUseAlgo" data-name="${a.name}">立即使用</button></div><p style="color:var(--text);line-height:1.7;font-size:13px">${a.desc}</p><div class="chips" style="margin-top:12px"><span class="chip">适用任务：${a.task}</span></div>
+              <div class="section-head" style="margin-top:18px"><h2>参数配置</h2></div>
+              <div class="form-grid">
+                <div class="form-row"><label>数据集路径</label><input class="field" value="/data/graph/cora/"></div>
+                <div class="form-row"><label>训练轮次</label><input class="field" type="number" value="200"></div>
+                <div class="form-row"><label>学习率</label><input class="field" value="0.01"></div>
+                <div class="form-row"><label>隐藏维度</label><input class="field" type="number" value="64"></div>
+                <div class="form-row"><label>Dropout</label><input class="field" value="0.5"></div>
+                <div class="form-row"><label>权重衰减</label><input class="field" value="5e-4"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary" data-action="graphSubmitExp" data-name="${a.name}">提交执行</button><button class="btn">加载默认参数</button></div>
+              <div class="preview-box" style="margin-top:12px"><small style="color:var(--muted)">参数范围建议：学习率 0.001-0.1，隐藏维度 16-256，Dropout 0.1-0.8</small></div>
+              </div>`;
+            })() : `<div class="card card-pad"><div class="empty">点击左侧算法查看详情并配置参数<br><small>支持 GCN、GAT、GraphSAGE 等 12 种图学习算法</small></div></div>`}
+          </div>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>实验任务管理</h2><button class="btn small primary right" data-action="graphNewExp">新建实验</button></div>
+          <div class="table-wrap"><table><thead><tr><th>任务ID</th><th>实验名称</th><th>算法</th><th>状态</th><th>准确率</th><th>耗时</th><th>日期</th><th>操作</th></tr></thead><tbody>
+            ${graphExps.map(e=>`<tr><td>${e.id}</td><td class="table-title">${e.name}</td><td>${e.algo}</td><td>${badge(e.status)}</td><td>${e.acc}</td><td>${e.time}</td><td>${e.date}</td><td><div class="actions"><button class="link" data-action="graphExpDetail" data-id="${e.id}">详情</button><button class="link" data-action="graphExpResult" data-id="${e.id}">结果</button>${e.status==='失败'?`<button class="link" data-action="graphExpLog" data-id="${e.id}">日志</button>`:''}<button class="link" data-action="graphExpClone" data-id="${e.id}">复用</button><button class="link" data-action="graphExpDelete" data-id="${e.id}" style="color:var(--red)">删除</button></div></td></tr>`).join('')}
+          </tbody></table></div>
+        </section>
+        ${state.algoGraphItem ? `
+        <section class="section">
+          <div class="section-head"><h2>实验结果分析与可视化</h2></div>
+          <div class="grid cols-2">
+            <div class="card card-pad"><div class="section-head"><h2>性能指标仪表盘</h2></div>
+              <div class="result-grid">
+                <div class="result-stat best"><div class="num">92.3%</div><div class="lbl">准确率</div></div>
+                <div class="result-stat"><div class="num">91.1%</div><div class="lbl">精确率</div></div>
+                <div class="result-stat"><div class="num">89.7%</div><div class="lbl">召回率</div></div>
+                <div class="result-stat"><div class="num">90.4%</div><div class="lbl">F1 分数</div></div>
+                <div class="result-stat"><div class="num">0.94</div><div class="lbl">AUC</div></div>
+              </div>
+              <div style="margin-top:12px;padding:10px;background:#f5f9ff;border-radius:7px;font-size:12px;color:#63748d">与基线模型对比：准确率提升 3.8%，F1 提升 4.2%</div>
+            </div>
+            <div class="card card-pad"><div class="section-head"><h2>可视化结果</h2><select class="field" style="width:auto;font-size:12px" id="graphVizType"><option value="embed">节点嵌入分布</option><option value="link">链接预测高亮</option></select></div>
+              <div style="height:180px;display:grid;place-items:center;background:#f9fbfd;border-radius:7px"><svg width="280" height="160"><g>${[...Array(40)].map((_,i)=>{const x=40+Math.random()*200,y=20+Math.random()*120,c=['#1767f2','#16a6c7','#16a36a','#d98a08','#db3b45','#7a65d8'][i%6];return `<circle cx="${x}" cy="${y}" r="4" fill="${c}" opacity="0.7"/>`}).join('')}</g><line x1="60" y1="40" x2="180" y2="100" stroke="#16a36a" stroke-width="2" opacity="0.6"/><line x1="100" y1="80" x2="220" y2="50" stroke="#16a36a" stroke-width="2" opacity="0.6"/><line x1="50" y1="120" x2="200" y2="30" stroke="#db3b45" stroke-width="2" stroke-dasharray="4,2" opacity="0.5"/></svg><small style="color:var(--muted)">绿色实线：预测为正链接 · 红色虚线：预测为负链接</small></div>
+              <div style="display:flex;gap:8px;margin-top:12px"><button class="btn small">下载 CSV 预测结果</button><button class="btn small">下载 PDF 报告</button><button class="btn small">下载嵌入向量</button></div>
+            </div>
+          </div>
+        </section>` : ''}`;
+      const docs = `
+        <div class="grid cols-3">
+          <article class="card algo-card" data-action="graphDocCenter"><div class="algo-top"><div class="algo-icon">${icon('doc',20)}</div><h3>在线技术文档中心</h3></div><p class="algo-desc">结构化导航、全文搜索与 Markdown 渲染，涵盖快速开始、用户指南、算法原理与常见问题。</p><div class="chips"><span class="chip">全文搜索</span><span class="chip">语法高亮</span></div></article>
+          <article class="card algo-card" data-action="graphApiRef"><div class="algo-top"><div class="algo-icon" style="color:var(--green);background:#e9faf2">${icon('server',20)}</div><h3>API 接口参考手册</h3></div><p class="algo-desc">按功能模块组织的 API 文档，含请求参数、返回结构、在线调试工具。</p><div class="chips"><span class="chip">在线调试</span><span class="chip">JSON 示例</span></div></article>
+          <article class="card algo-card" data-action="graphCodeExample"><div class="algo-top"><div class="algo-icon" style="color:var(--amber);background:#fff5df">${icon('algo',20)}</div><h3>开发示例与代码库</h3></div><p class="algo-desc">覆盖典型场景的可运行代码示例，支持一键下载与环境配置说明。</p><div class="chips"><span class="chip">Jupyter</span><span class="chip">README</span></div></article>
+        </div>
+        <section class="section">
+          <div class="card" style="overflow:hidden">
+            <div class="card-pad section-head" style="margin:0;border-bottom:1px solid var(--line)"><h2>在线技术文档中心</h2><input class="inline-search right" placeholder="搜索文档内容..." id="graphDocSearch" style="width:240px"></div>
+            <div class="doc-layout">
+              <div class="doc-side">
+                <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>快速开始</div><div class="tree-body"><div class="tree-item active">环境准备</div><div class="tree-item">安装指南</div><div class="tree-item">第一个图模型</div></div></div>
+                <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>用户指南</div><div class="tree-body"><div class="tree-item">数据格式说明</div><div class="tree-item">任务配置流程</div><div class="tree-item">模型导出与部署</div></div></div>
+                <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>算法原理</div><div class="tree-body"><div class="tree-item">GCN 原理详解</div><div class="tree-item">GAT 注意力机制</div><div class="tree-item">对比学习框架</div></div></div>
+                <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>常见问题</div><div class="tree-body"><div class="tree-item">OOM 处理</div><div class="tree-item">大规模图采样</div></div></div>
+              </div>
+              <div class="doc-content">
+                <h3>环境准备</h3>
+                <p>在使用图计算算法工具集前，请确保已完成以下环境配置：</p>
+                <ul><li>Python 3.8+ 及 PyTorch 2.0+</li><li>PyTorch Geometric (PyG) 图神经网络库</li><li>至少 8GB 显存的 GPU（推荐）</li></ul>
+                <h4>安装命令</h4>
+                <div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>pip install torch-geometric
+pip install torch-scatter torch-sparse</div>
+                <h4>GCN 编码器结构示意图</h4>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='120'%3E%3Crect width='400' height='120' fill='%23f0f4fa' rx='8'/%3E%3Crect x='20' y='40' width='60' height='40' fill='%231767f2' rx='5'/%3E%3Ctext x='50' y='64' text-anchor='middle' fill='white' font-size='11'%3EInput%3C/text%3E%3Crect x='120' y='30' width='60' height='60' fill='%2316a6c7' rx='5'/%3E%3Ctext x='150' y='64' text-anchor='middle' fill='white' font-size='10'%3EGCNConv%3C/text%3E%3Crect x='220' y='40' width='50' height='40' fill='%23d98a08' rx='5'/%3E%3Ctext x='245' y='64' text-anchor='middle' fill='white' font-size='9'%3EReLU%3C/text%3E%3Crect x='310' y='40' width='60' height='40' fill='%2316a36a' rx='5'/%3E%3Ctext x='340' y='64' text-anchor='middle' fill='white' font-size='10'%3EOutput%3C/text%3E%3Cline x1='80' y1='60' x2='120' y2='60' stroke='%237d8a9f'/%3E%3Cline x1='180' y1='60' x2='220' y2='60' stroke='%237d8a9f'/%3E%3Cline x1='270' y1='60' x2='310' y2='60' stroke='%237d8a9f'/%3E%3C/svg%3E" style="width:100%;border-radius:7px;cursor:pointer;border:1px solid var(--line)" data-action="graphZoomImage" alt="GCN结构示意图">
+                <small style="color:var(--muted)">点击图片可放大查看</small>
+                <h4>数据格式</h4>
+                <p>系统支持 CSV 边表和节点特征文件格式。边表包含 source 和 target 两列，节点特征文件以节点 ID 为索引。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>API 接口参考手册</h2></div>
+          <div class="card card-pad">
+            <div class="form-grid">
+              <div class="form-row"><label>接口模块</label><select class="field"><option>预训练框架 API</option><option>算法库 API</option><option>模型管理 API</option></select></div>
+              <div class="form-row"><label>接口</label><select class="field"><option>POST /api/graph/pretrain — 创建预训练任务</option><option>GET /api/graph/models — 获取模型列表</option><option>POST /api/graph/export — 导出模型</option></select></div>
+            </div>
+            <div style="margin-top:14px">
+              <div class="api-row"><label>请求 URL</label><span>POST /api/graph/pretrain</span></div>
+              <div class="api-row"><label>Content-Type</label><span>application/json</span></div>
+              <div class="api-row"><label>dataset</label><span>string (必填) — 数据集路径</span></div>
+              <div class="api-row"><label>encoder</label><span>string (默认 GCN) — 编码器类型</span></div>
+              <div class="api-row"><label>epochs</label><span>int (默认 200) — 训练轮次</span></div>
+              <div class="api-row"><label>返回示例</label><span style="color:var(--green)">{"task_id":"GE-006","status":"queued"}</span></div>
+            </div>
+            <div class="section-head" style="margin-top:16px"><h2>在线调试</h2><button class="btn small primary" data-action="graphApiDebug">发送请求</button></div>
+            <div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>curl -X POST https://api.maas.platform/graph/pretrain \\
+  -H "Content-Type: application/json" \\
+  -d '{"dataset":"cora","encoder":"GCN","epochs":200}'</div>
+            <div class="preview-box" style="margin-top:10px"><b>响应结果</b><br>{"task_id":"GE-006","status":"queued","eta":"12m"}</div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>开发示例与代码库</h2></div>
+          <div class="grid cols-2">
+            <div class="card card-pad"><div class="section-head"><h3>基于 GCN 的论文分类</h3></div><p style="color:var(--muted);font-size:12px">使用 GCN 对 Cora 数据集进行论文主题分类，完整端到端流程。</p><div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>from torch_geometric.nn import GCNConv
+import torch.nn.functional as F
+
+class GCN(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = GCNConv(1433, 64)
+        self.conv2 = GCNConv(64, 7)
+    def forward(self, data):
+        x, edge_index = data.x, data.edge_index
+        x = F.relu(self.conv1(x, edge_index))
+        x = F.dropout(x, p=0.5)
+        return self.conv2(x, edge_index)</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn small primary" data-action="graphDownloadCode">下载代码包</button><button class="btn small">查看 README</button></div></div>
+            <div class="card card-pad"><div class="section-head"><h3>使用 Graph2Vec 进行图相似度计算</h3></div><p style="color:var(--muted);font-size:12px">使用 Graph2Vec 生成图级嵌入并进行相似度检索。</p><div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>from karateclub import Graph2Vec
+
+model = Graph2Vec(dimensions=128)
+model.fit(graph_list)
+embeddings = model.get_embedding()</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn small primary" data-action="graphDownloadCode">下载代码包</button><button class="btn small">查看 README</button></div></div>
+          </div>
+        </section>`;
+      const panels = {pretrain, algolib, docs};
+      return `<div class="sub-tabs">${subs.map(s=>`<button class="sub-tab ${state.algoSub===s.id?'active':''}" data-algo-sub="${s.id}">${s.label}</button>`).join('')}</div>${panels[state.algoSub]||panels.pretrain}`;
+    }
+    /* === 提示学习算法 === */
+    function algoPrompt() {
+      const subs = [{id:'template',label:'提示模板构建'},{id:'model',label:'多模型兼容支持'},{id:'optimize',label:'智能提示优化'},{id:'explain',label:'算法解释与迁移'},{id:'downstream',label:'下游任务快速适配'}];
+      const template = `
+        <div class="split">
+          <div class="card card-pad">
+            <div class="section-head"><h2>模板可视化编辑器</h2><button class="btn small" data-action="promptPreview">预览</button></div>
+            <div style="display:flex;gap:4px;padding:6px 0;border-bottom:1px solid var(--line);margin-bottom:10px">
+              <button class="btn small" data-action="promptCopy" title="复制">复制</button>
+              <button class="btn small" data-action="promptPaste" title="粘贴">粘贴</button>
+              <button class="btn small" data-action="promptFind" title="查找">查找</button>
+              <button class="btn small" data-action="promptReplace" title="替换">替换</button>
+            </div>
+            <div class="form-row"><label>提示模板</label><textarea class="field" id="promptText" rows="8">你是一名科技情报分析专家。请根据以下材料提取关键技术、研究机构与潜在趋势，并以 JSON 格式输出。
+
+材料：{{input}}
+输出格式：{{format}}</textarea></div>
+            <div style="margin-top:12px">
+              <label class="table-sub">已识别变量</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px">
+                <span class="var-chip">{{input}} <small style="color:var(--muted)">— 输入材料</small></span>
+                <span class="var-chip">{{format}} <small style="color:var(--muted)">— 输出格式</small></span>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:14px">
+              <div class="form-row"><label>变量默认值 — input</label><input class="field" value="（粘贴科技文献摘要）"></div>
+              <div class="form-row"><label>变量默认值 — format</label><input class="field" value='{"tech":"关键技术","org":"研究机构","trend":"趋势"}'></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary" data-action="promptSaveTpl">保存模板</button><button class="btn" data-action="promptTest">运行测试</button></div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-head"><h2>模板库</h2><input class="inline-search right" placeholder="搜索模板..." style="width:160px"></div>
+            <div style="display:grid;gap:10px">
+              ${promptTemplates.map(t=>`<div class="card card-pad" style="padding:12px;cursor:pointer" data-action="promptLoadTpl" data-name="${t.name}"><div style="display:flex;align-items:center;gap:8px"><b style="color:var(--ink);font-size:13px">${t.name}</b><span class="badge blue" style="margin-left:auto">${t.cat}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">${t.tags.map(tag=>`<span class="chip">${tag}</span>`).join('')}<span class="chip">评分 ${t.score}</span><span class="chip">${t.model}</span></div></div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      const model = `
+        <div class="grid cols-3">
+          ${models.filter(m=>['Qwen2.5-7B','DeepSeek-V3','GLM-4-9B'].includes(m.name)).map(m=>`<article class="card algo-card" data-action="promptSelectModel" data-name="${m.name}"><div class="algo-top"><div class="algo-icon">${icon('model',20)}</div><h3>${m.name}</h3></div><p class="algo-desc">${m.desc}</p><div class="chips"><span class="chip">${m.version}</span><span class="chip">${m.size}</span></div><div style="display:flex;align-items:center;gap:6px;margin-top:10px"><span class="dot" style="width:6px;height:6px;background:var(--green);border-radius:50%"></span><small style="color:var(--green)">已连接/就绪</small></div></article>`).join('')}
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>模型连接状态监测</h2></div>
+          <div class="card card-pad">
+            <div class="grid cols-3" style="margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;background:var(--green);border-radius:50%"></span><small style="color:var(--green)">Qwen2.5-7B 已连接/就绪</small></div>
+              <div style="display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;background:var(--green);border-radius:50%"></span><small style="color:var(--green)">GLM-4-9B 已连接/就绪</small></div>
+              <div style="display:flex;align-items:center;gap:6px"><span class="dot" style="width:8px;height:8px;background:var(--red);border-radius:50%"></span><small style="color:var(--red)">DeepSeek-V3 未连接/错误</small></div>
+            </div>
+            <div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>DeepSeek-V3 模型加载进度</span><span>65%</span></div><div class="progress" style="width:100%"><i style="--value:65%;--color:var(--amber)"></i></div></div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>模型推理参数配置</h2></div>
+          <div class="card card-pad">
+            <div class="form-grid">
+              <div class="form-row"><label>温度（Temperature）</label><div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="2" step="0.1" value="0.7" style="flex:1" class="field" id="tempSlider"><span id="tempVal" style="font-weight:650">0.7</span></div></div>
+              <div class="form-row"><label>Top-p</label><div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="1" step="0.05" value="0.9" style="flex:1" class="field" id="toppSlider"><span id="toppVal" style="font-weight:650">0.9</span></div></div>
+              <div class="form-row"><label>最大生成长度</label><input class="field" type="number" value="2048"></div>
+              <div class="form-row"><label>重复惩罚</label><input class="field" value="1.1"></div>
+            </div>
+            <div class="preview-box" style="margin-top:12px"><b>统一调用接口</b><br><small style="color:var(--muted)">系统后端将不同模型的 API 封装为统一的内部调用接口，前端操作自动转发至对应模型服务，用户无感知。输入输出格式已标准化。</small></div>
+          </div>
+        </section>`;
+      const optimize = `
+        <div class="split">
+          <div class="card card-pad">
+            <div class="section-head"><h2>优化策略配置</h2></div>
+            <div class="form-grid">
+              <div class="form-row full"><label>优化算法</label><select class="field"><option>指令重构 + 示例增强</option><option>梯度引导优化</option><option>进化搜索</option><option>蒙特卡洛树搜索</option></select></div>
+              <div class="form-row full"><label>样本数据上传</label><div style="border:2px dashed #dce4ef;border-radius:7px;padding:20px;text-align:center;color:var(--muted);cursor:pointer" data-action="promptUploadSample"><p style="margin:0">${icon('plus',24)}</p><small>点击上传标注样本文件（.csv / .jsonl）</small></div></div>
+              <div class="form-row full"><label>或直接粘贴样本数据</label><textarea class="field" rows="4" placeholder='每行一条，格式如：{"text":"样本内容","label":"标签"}'>{"text":"大模型在科技情报领域的应用","label":"AI"}
+{"text":"量子计算在密码学中的研究","label":"Physics"}</textarea></div>
+            </div>
+            <div class="preview-box" style="margin-top:12px"><b>样本预览</b><br><small>输入字段：text | 标签字段：label | 样本数：50</small></div>
+            <button class="btn primary" style="width:100%;margin-top:14px" data-action="promptStartOpt">启动优化</button>
+          </div>
+          <div class="card card-pad">
+            <div class="section-head"><h2>优化过程监控</h2></div>
+            <div style="margin:12px 0"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>迭代进度</span><span>第 8 / 10 轮</span></div><div class="progress" style="width:100%"><i style="--value:80%"></i></div></div>
+            <div class="log" style="min-height:100px">[迭代 1] 尝试 5 个提示变体，最优 F1=0.82
+[迭代 3] 调整指令措辞，F1=0.85
+[迭代 5] 增加示例，F1=0.88
+[迭代 8] 当前最优 F1=0.91，已尝试 38 个提示</div>
+            <div class="section-head" style="margin-top:14px"><h2>优化结果对比</h2></div>
+            <div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>版本</th><th>准确率</th><th>召回率</th><th>F1</th><th>操作</th></tr></thead><tbody>
+              <tr><td>原始提示</td><td>82.1%</td><td>79.3%</td><td>80.7%</td><td>--</td></tr>
+              <tr style="background:#f0fdf5"><td><b>优化后 v2</b></td><td><b style="color:var(--green)">91.2%</b></td><td><b style="color:var(--green)">88.6%</b></td><td><b style="color:var(--green)">89.9%</b></td><td><button class="link" data-action="promptApplyOpt">应用</button></td></tr>
+            </tbody></table></div>
+          </div>
+        </div>`;
+      const explain = `
+        <div class="grid cols-2">
+          <div class="card card-pad">
+            <div class="section-head"><h2>提示影响分析</h2></div>
+            <p style="color:var(--muted);font-size:12px">标记提示中的不同成分（指令、背景、示例、格式），系统自动生成对比变体。</p>
+            <div style="margin:12px 0">
+              <div class="var-chip" style="margin:3px">[指令] 提取关键技术</div>
+              <div class="var-chip" style="margin:3px">[背景] 你是科技情报专家</div>
+              <div class="var-chip" style="margin:3px">[示例] 示例：...</div>
+              <div class="var-chip" style="margin:3px">[格式] JSON 输出</div>
+            </div>
+            <button class="btn primary" style="width:100%" data-action="promptGenVariant">生成变体并批量测试</button>
+          </div>
+          <div class="card card-pad">
+            <div class="section-head"><h2>并行对比视图</h2></div>
+            <div class="table-wrap"><table><thead><tr><th>变体</th><th>改动成分</th><th>输出摘要</th><th>影响</th></tr></thead><tbody>
+              <tr><td>原始</td><td>—</td><td>提取5个技术、3个机构</td><td>—</td></tr>
+              <tr><td>v1</td><td><span class="diff-del">移除背景</span></td><td>提取3个技术、1个机构</td><td><span class="badge red">决定性</span></td></tr>
+              <tr><td>v2</td><td><span class="diff-add">增加示例</span></td><td>提取6个技术、4个机构</td><td><span class="badge green">显著提升</span></td></tr>
+              <tr><td>v3</td><td>修改格式</td><td>提取5个技术、3个机构</td><td><span class="badge">轻微</span></td></tr>
+            </tbody></table></div>
+            <div class="section-head" style="margin-top:14px"><h2>输出文本差异对比（差异高亮）</h2></div>
+            <div class="grid cols-2" style="gap:10px">
+              <div class="preview-box" style="padding:10px"><b>原始输出</b><br><small style="color:var(--muted)">关键技术：<span class="diff-del">大模型预训练</span>、知识图谱、<span class="diff-del">图神经网络</span>；研究机构：清华、中科院、<span class="diff-del">MIT</span></small></div>
+              <div class="preview-box" style="padding:10px"><b>v1 输出（移除背景）</b><br><small style="color:var(--muted)">关键技术：<span class="diff-add">大模型预训练</span>；研究机构：<span class="diff-add">清华</span></small></div>
+              <div class="preview-box" style="padding:10px"><b>v2 输出（增加示例）</b><br><small style="color:var(--muted)">关键技术：大模型预训练、知识图谱、图神经网络、<span class="diff-add">强化学习</span>、<span class="diff-add">联邦学习</span>、<span class="diff-add">扩散模型</span>；研究机构：清华、中科院、MIT、<span class="diff-add">斯坦福</span></small></div>
+              <div class="preview-box" style="padding:10px"><b>v3 输出（修改格式）</b><br><small style="color:var(--muted)">关键技术：大模型预训练、知识图谱、图神经网络；研究机构：清华、中科院、MIT</small></div>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:var(--muted)"><span class="diff-add">绿色</span> = 新增内容 · <span class="diff-del">红色删除线</span> = 缺失内容 · 通过差异高亮技术直观显示不同输出之间的文本差异</div>
+            <div class="preview-box" style="margin-top:10px"><b>成分影响力总结</b><br><small>背景信息对输出产生决定性影响；示例增强显著提升信息完整性；格式调整影响轻微。</small></div>
+          </div>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>知识迁移管理</h2><button class="btn small primary right" data-action="promptExportJson">导出配置</button></div>
+          <div class="card card-pad">
+            <div class="preview-box"><b>可导出内容</b><br>提示模板、变量定义、目标模型、任务类型、性能指标、优化历史<br><small style="color:var(--muted)">导出为 JSON 格式文件，可在不同实验环境或项目间导入复用。</small></div>
+            <div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary" data-action="promptExportJson">导出 JSON</button><button class="btn" data-action="promptImportJson">导入配置</button></div>
+          </div>
+        </section>`;
+      const downstream = `
+        <div class="grid cols-3">
+          ${['文本生成','文本分类','命名实体识别','摘要生成','代码生成','翻译'].map(t=>`<article class="card algo-card" data-action="promptSelectTask" data-task="${t}"><div class="algo-top"><div class="algo-icon">${icon('task',20)}</div><h3>${t}</h3></div><p class="algo-desc">预设结构化提示模板，快速适配${t}任务场景。</p></article>`).join('')}
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>任务参数快速配置</h2><span class="badge blue">已选择：文本分类</span></div>
+          <div class="card card-pad">
+            <div class="form-grid">
+              <div class="form-row"><label>输出格式</label><select class="field"><option>单标签分类</option><option>多标签分类</option></select></div>
+              <div class="form-row"><label>候选标签</label><input class="field" value="AI, Physics, Material, Biology, Chemistry"></div>
+              <div class="form-row"><label>温度</label><input class="field" type="number" value="0.3" step="0.1"></div>
+              <div class="form-row"><label>最大生成长度</label><input class="field" type="number" value="64"></div>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>一键式任务测试与部署</h2></div>
+          <div class="split">
+            <div class="card card-pad">
+              <div class="form-row"><label>交互式测试</label><textarea class="field" rows="4" placeholder="输入测试数据...">近年来，大模型在科技情报分析领域的应用日益广泛，研究者通过多模态融合技术显著提升了信息抽取的准确率。</textarea></div>
+              <button class="btn primary" style="width:100%;margin-top:10px" data-action="promptRunTest">运行</button>
+              <div class="preview-box" style="margin-top:12px"><b>模型输出</b><br>{"tech":"多模态融合技术","org":"未明确","trend":"信息抽取准确率提升"}</div>
+            </div>
+            <div class="card card-pad">
+              <div class="section-head"><h2>批量测试</h2></div>
+              <div style="border:2px dashed #dce4ef;border-radius:7px;padding:18px;text-align:center;color:var(--muted);cursor:pointer" data-action="promptUploadBatch"><p style="margin:0">${icon('plus',24)}</p><small>上传 .txt / .csv 文件进行批量测试</small></div>
+              <div class="preview-box" style="margin-top:10px"><b>批量结果汇总</b><br><small>共处理 128 条数据，成功 126 条，失败 2 条</small></div>
+              <div style="display:flex;gap:8px;margin-top:10px"><button class="btn small primary" data-action="promptDownloadBatch">下载结果文件</button><button class="btn small">查看详细结果</button></div>
+              <div class="section-head" style="margin-top:14px"><h2>API 接口代码生成</h2></div>
+              <div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>import requests
+
+resp = requests.post(
+    "https://api.maas.platform/prompt/run",
+    json={"template_id":"tpl_001","input":"文本内容"}
+)
+print(resp.json())</div>
+              <button class="btn primary" style="width:100%;margin-top:10px" data-action="promptGenApi">生成 API 文档</button>
+            </div>
+          </div>
+        </section>`;
+      const panels = {template, model, optimize, explain, downstream};
+      return `<div class="sub-tabs">${subs.map(s=>`<button class="sub-tab ${state.algoSub===s.id?'active':''}" data-algo-sub="${s.id}">${s.label}</button>`).join('')}</div>${panels[state.algoSub]||panels.template}`;
+    }
+    /* === 反向提示算法 === */
+    function algoReverse() {
+      const subs = [{id:'infer',label:'提示反向推断'},{id:'adapt',label:'多模型适配机制'},{id:'scene',label:'多场景任务适配'}];
+      const infer = `
+        <div class="split">
+          <div class="card card-pad">
+            <div class="section-head"><h2>文本输入与分析触发</h2></div>
+            <div class="form-row"><label>模型生成文本 <span id="charCount" style="float:right;color:var(--muted)">0 字</span></label><textarea class="field" id="reverseText" rows="10" placeholder="粘贴待分析的模型生成文本，系统将反向推断可能的提示结构与指令意图。"></textarea></div>
+            <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" data-action="loadExample">加载示例</button><button class="btn ghost" data-action="clearReverse">清空</button><button class="btn primary" style="margin-left:auto" data-action="analyzeReverse">开始分析</button></div>
+          </div>
+          <div class="card card-pad" id="reverseResult">
+            <div class="empty">分析结果将在这里展示<br><small>包含提示词重构、关键指令、意图分类和置信度</small></div>
+          </div>
+        </div>`;
+      const adapt = `
+        <div class="grid cols-2">
+          <div class="card card-pad">
+            <div class="section-head"><h2>模型选择</h2></div>
+            <input class="inline-search" placeholder="搜索模型..." style="width:100%;margin-bottom:12px" id="reverseModelSearch">
+            <div style="display:grid;gap:8px">
+              ${[{'n':'Llama 3','v':'8B/70B','a':'自回归','s':'已优化支持'},{'n':'GLM-4','v':'9B','a':'自回归','s':'已优化支持'},{'n':'Qwen2.5','v':'7B/72B','a':'自回归','s':'已优化支持'},{'n':'DeepSeek-V3','v':'671B','a':'MoE','s':'基础支持'}].map(m=>`<div class="card card-pad" style="padding:12px;cursor:pointer" data-action="reverseSelectModel" data-name="${m.n}"><div style="display:flex;align-items:center;gap:8px"><b style="color:var(--ink);font-size:13px">${m.n}</b><span class="badge ${m.s==='已优化支持'?'green':'amber'}" style="margin-left:auto">${m.s}</span></div><div style="display:flex;gap:5px;margin-top:7px"><span class="chip">${m.v}</span><span class="chip">${m.a}</span></div></div>`).join('')}
+            </div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-head"><h2>模型信息</h2></div>
+            <div class="summary-list">
+              <div class="summary-row"><span>模型名称</span><b>Qwen2.5-7B</b></div>
+              <div class="summary-row"><span>版本号</span><b>v2.5.3</b></div>
+              <div class="summary-row"><span>架构类型</span><b>自回归模型</b></div>
+              <div class="summary-row"><span>参数规模</span><b>7B</b></div>
+              <div class="summary-row"><span>适配状态</span><b style="color:var(--green)">已优化支持</b></div>
+            </div>
+            <div class="preview-box" style="margin-top:14px"><b>适配策略自动调用</b><br><small style="color:var(--muted)">系统将自动使用 Qwen2.5 系列专用适配策略进行分析。支持对同一段文本使用不同模型的适配策略进行对比分析。</small></div>
+            <button class="btn primary" style="width:100%;margin-top:12px" data-action="reverseCompareModels">多模型策略对比</button>
+          </div>
+        </div>`;
+      const scene = `
+        <div class="grid cols-3">
+          ${['通用文本生成','摘要生成','代码生成','翻译','问答对生成'].map((t,i)=>`<article class="card algo-card ${i===0?'':''}" data-action="reverseSelectScene" data-scene="${t}"><div class="algo-top"><div class="algo-icon">${icon('task',20)}</div><h3>${t}</h3></div><p class="algo-desc">${{'通用文本生成':'适用于开放式文本创作与续写场景','摘要生成':'适用于文献摘要与内容压缩场景','代码生成':'适用于编程辅助与代码补全场景','翻译':'适用于多语言互译场景','问答对生成':'适用于知识问答与对话构建场景'}[t]}</p></article>`).join('')}
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>任务特定参数配置</h2><span class="badge blue">已应用：通用文本生成参数</span></div>
+          <div class="card card-pad">
+            <div class="form-grid">
+              <div class="form-row"><label>分析深度</label><select class="field"><option>标准分析</option><option>深度分析</option><option>快速分析</option></select></div>
+              <div class="form-row"><label>指令识别粒度</label><select class="field"><option>粗粒度</option><option>细粒度</option></select></div>
+              <div class="form-row"><label>输出语言</label><select class="field"><option>中文</option><option>英文</option><option>跟随输入</option></select></div>
+              <div class="form-row"><label>对比模式</label><select class="field"><option>启用多模型对比</option><option>单模型分析</option></select></div>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>策略调整与权重应用</h2><span class="badge green right">当前策略：通用文本生成</span></div>
+          <div class="grid cols-2">
+            <div class="card card-pad">
+              <div class="section-head"><h2>分析维度权重分配</h2></div>
+              <div class="weight-bar"><span>语法</span><div class="metric-bar"><i style="--value:25%;--color:var(--primary)"></i></div><b>25%</b></div>
+              <div class="weight-bar"><span>语义</span><div class="metric-bar"><i style="--value:35%;--color:var(--cyan)"></i></div><b>35%</b></div>
+              <div class="weight-bar"><span>结构</span><div class="metric-bar"><i style="--value:20%;--color:var(--green)"></i></div><b>20%</b></div>
+              <div class="weight-bar"><span>关键词</span><div class="metric-bar"><i style="--value:20%;--color:var(--amber)"></i></div><b>20%</b></div>
+            </div>
+            <div class="card card-pad">
+              <div class="section-head"><h2>权重可视化（雷达图）</h2></div>
+              <div style="display:grid;place-items:center;height:180px">
+                <svg width="180" height="160" viewBox="0 0 180 160">
+                  <polygon points="90,20 160,60 140,140 40,140 20,60" fill="none" stroke="#e4eaf3" stroke-width="1"/>
+                  <polygon points="90,50 130,70 120,120 60,120 50,70" fill="none" stroke="#e4eaf3" stroke-width="1"/>
+                  <polygon points="90,35 145,65 128,132 52,132 35,65" fill="rgba(23,103,242,.15)" stroke="#1767f2" stroke-width="2"/>
+                  <text x="90" y="15" text-anchor="middle" font-size="10" fill="#7d8a9f">语法 25%</text>
+                  <text x="170" y="60" font-size="10" fill="#7d8a9f">语义 35%</text>
+                  <text x="145" y="155" font-size="10" fill="#7d8a9f">结构 20%</text>
+                  <text x="15" y="155" font-size="10" fill="#7d8a9f">关键词 20%</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="preview-box" style="margin-top:14px;border-color:var(--cyan)"><b>场景化结果优化</b><br><small style="color:var(--muted)">系统已基于当前任务场景（通用文本生成）对推断结果进行针对性优化：增强了语义维度的权重分配，优化了指令识别的粒度策略，使推断结果更贴合该场景下文本生成的典型特征。</small></div>
+        </section>`;
+      const panels = {infer, adapt, scene};
+      return `<div class="sub-tabs">${subs.map(s=>`<button class="sub-tab ${state.algoSub===s.id?'active':''}" data-algo-sub="${s.id}">${s.label}</button>`).join('')}</div>${panels[state.algoSub]||panels.infer}`;
+    }
+    /* === 小样本学习算法 === */
+    function algoFewshot() {
+      const subs = [{id:'framework',label:'算法框架集成'},{id:'eval',label:'评估基准构建'},{id:'downstream',label:'下游任务适配'},{id:'docs',label:'技术文档与支持'}];
+      const framework = `
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          ${['度量学习（Metric-based）','优化学习（Optimization-based）','元学习（Meta-Learning）'].map((c,i)=>`<button class="seg-btn ${state.algoFewCat===(['metric','optim','meta'][i])||(!state.algoFewCat&&i===0)?'active':''}" data-few-cat="${['metric','optim','meta'][i]}">${c}</button>`).join('')}
+        </div>
+        <div class="split">
+          <div>
+            <div class="grid cols-2">
+              ${fewshotModels.filter(m=>!state.algoFewCat||m.cat==={'metric':'度量学习','optim':'优化学习','meta':'元学习'}[state.algoFewCat]).map(m=>`<article class="card algo-card" data-action="fewSelectModel" data-name="${m.name}"><div class="algo-top"><div class="algo-icon">${icon('algo',20)}</div><h3>${m.name}</h3></div><p class="algo-desc">${m.desc}</p><div class="chips"><span class="chip">${m.cat}</span><span class="chip">${m.params}</span></div></article>`).join('')}
+            </div>
+          </div>
+          <div>
+            ${state.algoFewItem ? (() => {
+              const m = fewshotModels.find(x=>x.name===state.algoFewItem);
+              return `<div class="detail-panel"><h3>${m.name}</h3>
+              <div class="summary-list" style="margin-top:10px">
+                <div class="summary-row"><span>模型分类</span><b>${m.cat}</b></div>
+                <div class="summary-row"><span>适用场景</span><b>${m.scenario}</b></div>
+                <div class="summary-row"><span>参考文献</span><b><a href="${m.link}" target="_blank" style="color:var(--primary)">${m.ref} ↗</a></b></div>
+              </div>
+              <div class="section-head" style="margin-top:14px"><h2>模型简介与核心原理</h2></div>
+              <p style="color:var(--text);line-height:1.7;font-size:13px;margin-top:8px">${m.desc}</p>
+              <div class="section-head" style="margin-top:16px"><h2>参数配置面板</h2></div>
+              <div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>参数名称</th><th>当前值</th><th>默认值</th><th>建议取值范围</th><th>详细描述</th></tr></thead><tbody>
+                <tr><td><b>学习率</b></td><td><input class="field" value="0.001" style="width:80px"></td><td><small>0.001</small></td><td><small>0.0001 ~ 0.1</small></td><td><small>控制梯度下降步长，过大易震荡发散，过小收敛慢</small></td></tr>
+                <tr><td><b>迭代次数</b></td><td><input class="field" type="number" value="10000" style="width:80px"></td><td><small>10000</small></td><td><small>1000 ~ 50000</small></td><td><small>训练总轮次，需配合早停策略避免过拟合</small></td></tr>
+                <tr><td><b>嵌入维度</b></td><td><input class="field" type="number" value="64" style="width:80px"></td><td><small>64</small></td><td><small>32 ~ 256</small></td><td><small>样本特征映射后的向量维度，越大表达力越强但计算量增加</small></td></tr>
+                <tr><td><b>N-way</b></td><td><input class="field" type="number" value="5" style="width:80px"></td><td><small>5</small></td><td><small>3 ~ 20</small></td><td><small>每个 episode 中采样的类别数，常见为 5 或 10</small></td></tr>
+                <tr><td><b>K-shot</b></td><td><input class="field" type="number" value="5" style="width:80px"></td><td><small>5</small></td><td><small>1 ~ 10</small></td><td><small>每个类别的支持集样本数，1-shot 难度最高</small></td></tr>
+                <tr><td><b>内部学习率</b></td><td><input class="field" value="0.01" style="width:80px"></td><td><small>0.01</small></td><td><small>0.001 ~ 0.1</small></td><td><small>元学习内循环的步长，控制单次任务适应速度</small></td></tr>
+              </tbody></table></div>
+              <div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary" data-action="fewSaveConfig">保存配置</button><button class="btn" data-action="fewLoadConfig">加载配置</button><button class="btn ghost" data-action="fewDeleteConfig">删除配置</button></div>
+              </div>`;
+            })() : `<div class="card card-pad"><div class="empty">点击左侧模型查看详情并配置参数<br><small>内置支持 Prototypical Networks、Matching Networks、MAML 等主流模型</small></div></div>`}
+          </div>
+        </div>`;
+      const eval = `
+        <div class="card card-pad">
+          <div class="section-head"><h2>评估任务配置</h2></div>
+          <div class="form-grid">
+            <div class="form-row"><label>评测数据集</label><select class="field"><option>miniImageNet</option><option>tieredImageNet</option><option>自定义数据集</option></select></div>
+            <div class="form-row"><label>评测协议</label><select class="field"><option>5-way 5-shot</option><option>5-way 1-shot</option><option>10-way 5-shot</option></select></div>
+            <div class="form-row full"><label>待评估模型（多选）</label><div class="tag-input"><span class="var-chip">Prototypical Networks ✓</span><span class="var-chip">MAML ✓</span><span class="var-chip">Relation Network ✓</span><input placeholder="添加模型..."></div></div>
+          </div>
+          <button class="btn primary" style="margin-top:14px" data-action="fewStartEval">开始评估</button>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>评估执行与监控</h2><span class="badge green"><span class="dot" style="width:5px;height:5px;box-shadow:none"></span>评估中</span></div>
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>当前进度</span><span>模型 2/3 · 轮次 450/600</span></div>
+            <div class="progress" style="width:100%"><i style="--value:75%"></i></div>
+            <div class="log" style="margin-top:12px;min-height:80px">[14:20] 数据加载完成：miniImageNet (600 classes)
+[14:22] Prototypical Networks 训练完成 · Acc 62.4%
+[14:28] MAML 训练中... 450/600 episodes
+[14:30] MAML 当前 Acc 48.2%</div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>评估报告</h2><div class="right"><button class="btn small">导出 PDF</button><button class="btn small">导出 HTML</button></div></div>
+          <div class="table-wrap"><table><thead><tr><th>模型</th><th>准确率</th><th>精确率</th><th>召回率</th><th>F1</th><th>结论</th></tr></thead><tbody>
+            <tr style="background:#f0fdf5"><td class="table-title"><a style="color:var(--primary);cursor:pointer" data-action="fewModelDetail" data-model="Prototypical Networks">Prototypical Networks</a></td><td><b style="color:var(--green)">62.4%</b></td><td>61.8%</td><td>60.2%</td><td>61.0%</td><td>${badge('最优')}</td></tr>
+            <tr><td><a style="color:var(--primary);cursor:pointer" data-action="fewModelDetail" data-model="MAML">MAML</a></td><td>48.7%</td><td>47.9%</td><td>46.5%</td><td>47.2%</td><td><span class="badge">对照</span></td></tr>
+            <tr><td><a style="color:var(--primary);cursor:pointer" data-action="fewModelDetail" data-model="Relation Network">Relation Network</a></td><td>50.4%</td><td>49.6%</td><td>48.1%</td><td>48.8%</td><td><span class="badge">对照</span></td></tr>
+          </tbody></table></div>
+          <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+            <label style="font-size:13px;color:var(--muted)">图表类型</label>
+            <select class="field" style="width:auto;font-size:12px" id="fewChartType"><option value="bar">柱状图</option><option value="radar">雷达图</option></select>
+            <label style="font-size:13px;color:var(--muted)">对比维度</label>
+            <select class="field" style="width:auto;font-size:12px" id="fewChartDim"><option value="all">全部指标</option><option value="acc">准确率</option><option value="f1">F1 分数</option></select>
+          </div>
+          <div class="grid cols-2" style="margin-top:10px">
+            <div class="card card-pad"><div class="section-head"><h2>柱状图对比</h2></div>
+              <div style="display:flex;gap:12px;align-items:flex-end;height:120px;padding:10px">
+                <div style="flex:1;text-align:center"><div style="height:80px;background:var(--green);border-radius:4px 4px 0 0"></div><small>P 62.4%</small></div>
+                <div style="flex:1;text-align:center"><div style="height:62px;background:var(--primary);border-radius:4px 4px 0 0"></div><small>M 48.7%</small></div>
+                <div style="flex:1;text-align:center"><div style="height:64px;background:var(--cyan);border-radius:4px 4px 0 0"></div><small>R 50.4%</small></div>
+              </div>
+            </div>
+            <div class="card card-pad"><div class="section-head"><h2>雷达图对比</h2></div>
+              <div style="display:grid;place-items:center;height:140px">
+                <svg width="200" height="140" viewBox="0 0 200 140">
+                  <polygon points="100,15 170,50 160,120 40,120 30,50" fill="none" stroke="#e4eaf3" stroke-width="1"/>
+                  <polygon points="100,40 145,55 140,105 60,105 55,55" fill="none" stroke="#e4eaf3" stroke-width="1"/>
+                  <polygon points="100,25 162,52 155,115 48,115 42,52" fill="rgba(22,163,106,.12)" stroke="#16a36a" stroke-width="2"/>
+                  <polygon points="100,55 125,62 122,98 78,98 75,62" fill="rgba(23,103,242,.1)" stroke="#1767f2" stroke-width="2" stroke-dasharray="4,2"/>
+                  <polygon points="100,48 130,60 126,100 74,100 70,60" fill="rgba(22,166,199,.1)" stroke="#16a6c7" stroke-width="2" stroke-dasharray="2,2"/>
+                  <text x="100" y="10" text-anchor="middle" font-size="9" fill="#7d8a9f">准确率</text>
+                  <text x="178" y="50" font-size="9" fill="#7d8a9f">精确率</text>
+                  <text x="165" y="133" font-size="9" fill="#7d8a9f">召回率</text>
+                  <text x="15" y="133" font-size="9" fill="#7d8a9f">F1</text>
+                  <text x="10" y="50" font-size="9" fill="#7d8a9f">AUC</text>
+                </svg>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px"><span style="color:var(--green)">━ ProtoNet</span> · <span style="color:var(--primary)">┄ MAML</span> · <span style="color:var(--cyan)">┄ RelationNet</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid cols-2" style="margin-top:14px">
+            <div class="card card-pad"><div class="section-head"><h2>学习曲线</h2></div>${lineChart()}</div>
+            <div class="card card-pad"><div class="section-head"><h2>混淆矩阵</h2></div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;font-size:10px;text-align:center">
+                ${[...Array(25)].map((_,i)=>{const v=Math.floor(Math.random()*40)+60;const c=i%6===0?'#e7f8f0':'#f0f4f9';return `<div style="background:${c};padding:8px 4px;color:var(--ink)">${v}%</div>`}).join('')}
+              </div>
+              <small style="color:var(--muted);margin-top:6px;display:block;text-align:center">Prototypical Networks · 5 类混淆矩阵</small>
+            </div>
+          </div>
+        </section>`;
+      const downstream = `
+        <div class="card card-pad">
+          <div class="section-head"><h2>任务类型选择与模板加载</h2></div>
+          <div class="grid cols-3" style="margin-bottom:14px">
+            ${['文本分类','图文匹配','情感分析'].map((t,i)=>`<article class="card algo-card ${i===0?'':''}" data-action="fewSelectDownTask" data-task="${t}"><div class="algo-top"><div class="algo-icon">${icon('task',20)}</div><h3>${t}</h3></div><p class="algo-desc">自动加载标准化数据格式模板和模型接口。</p></article>`).join('')}
+          </div>
+          <div class="preview-box"><b>示例数据结构</b><br><small style="color:var(--muted)">文本分类：{"text":"论文摘要","label":"AI"} · 格式：CSV/JSONL</small></div>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>任务数据上传与预览</h2></div>
+          <div class="card card-pad">
+            <div style="border:2px dashed #dce4ef;border-radius:7px;padding:20px;text-align:center;color:var(--muted);cursor:pointer" data-action="fewUploadData"><p style="margin:0">${icon('plus',24)}</p><small>上传 CSV / JSONL 格式数据文件</small></div>
+            <div class="section-head" style="margin-top:14px"><h2>数据预览（前 10 行）</h2></div>
+            <div class="table-wrap"><table><thead><tr><th>text</th><th>label</th></tr></thead><tbody>
+              ${[['该论文提出了一种新的图神经网络架构','AI'],['研究关注量子计算在密码学中的应用','Physics'],['基于深度学习的医学影像分析方法','AI'],['新型纳米材料的制备与表征','Material']].map(r=>`<tr><td>${r[0]}</td><td><span class="chip">${r[1]}</span></td></tr>`).join('')}
+            </tbody></table></div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>模型训练与监控</h2><span class="badge green"><span class="dot" style="width:5px;height:5px;box-shadow:none"></span>训练中</span><div class="right"><button class="btn small" data-action="fewPauseTrain">暂停</button></div></div>
+          <div class="grid cols-2">
+            <div class="card card-pad"><div class="section-head"><h2>损失函数曲线</h2></div>${lineChart()}</div>
+            <div class="card card-pad"><div class="section-head"><h2>验证集准确率</h2></div>${lineChart()}</div>
+          </div>
+          <div class="preview-box" style="margin-top:12px;border-color:var(--green)"><b>最优模型快照</b><br><small style="color:var(--muted)">系统已在训练过程中自动保存最优模型快照（Epoch 85 · Val Acc 62.4%）。训练完成后可直接用于推理测试，无需手动保存。</small></div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>模型推理与测试</h2></div>
+          <div class="card card-pad">
+            <div class="form-row"><label>测试输入</label><textarea class="field" rows="3" placeholder="输入待分类的文本...">该研究利用注意力机制改进了自然语言处理中的机器翻译任务。</textarea></div>
+            <button class="btn primary" style="margin-top:10px" data-action="fewInference">运行推理</button>
+            <div class="preview-box" style="margin-top:12px"><b>推理结果</b><br>预测类别：<span class="chip">AI</span> · 置信度：94.2%</div>
+          </div>
+        </section>`;
+      const docs = `
+        <div class="card" style="overflow:hidden">
+          <div class="card-pad section-head" style="margin:0;border-bottom:1px solid var(--line)"><h2>在线文档中心</h2><input class="inline-search right" placeholder="搜索文档..." style="width:240px"></div>
+          <div class="doc-layout">
+            <div class="doc-side">
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>快速入门</div><div class="tree-body"><div class="tree-item active">环境准备</div><div class="tree-item">安装指南</div></div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>算法原理</div><div class="tree-body"><div class="tree-item">度量学习原理</div><div class="tree-item">MAML 详解</div><div class="tree-item">Relation Network</div></div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>API 参考</div><div class="tree-body"><div class="tree-item">训练接口</div><div class="tree-item">评估接口</div><div class="tree-item">推理接口</div></div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>开发指南</div><div class="tree-body"><div class="tree-item">自定义数据集</div><div class="tree-item">自定义模型</div></div></div>
+              <div class="tree-group"><div class="tree-head"><span class="arrow">▼</span>常见问题</div><div class="tree-body"><div class="tree-item">过拟合处理</div><div class="tree-item">超参数调优</div></div></div>
+            </div>
+            <div class="doc-content">
+              <h3>度量学习原理</h3>
+              <p>度量学习是一类通过学习样本间的距离度量来实现分类的方法。在少样本学习场景中，度量学习通过计算查询样本到支持集中各类原型的距离来进行分类。</p>
+              <h4>Prototypical Networks</h4>
+              <p>计算每个类别的原型（支持集样本的均值），然后通过最近邻分类器进行预测。</p>
+              <h4>代码示例</h4>
+              <div class="code-block"><button class="copy-btn" data-action="copyCode">复制</button>from fewshot.proto import ProtoNet
+
+model = ProtoNet(encoder_dim=64)
+model.fit(support_x, support_y)
+preds = model.predict(query_x)</div>
+              <h4>端到端案例：使用 Relation Network 进行五分类任务</h4>
+              <p>完整描述了从数据准备到模型调用的每一步操作：</p>
+              <ul><li>步骤 1：加载 miniImageNet 数据集</li><li>步骤 2：配置 5-way 5-shot 协议</li><li>步骤 3：训练 Relation Network</li><li>步骤 4：评估并导出报告</li></ul>
+            </div>
+          </div>
+        </div>`;
+      const panels = {framework, eval, downstream, docs};
+      return `<div class="sub-tabs">${subs.map(s=>`<button class="sub-tab ${state.algoSub===s.id?'active':''}" data-algo-sub="${s.id}">${s.label}</button>`).join('')}</div>${panels[state.algoSub]||panels.framework}`;
     }
     function resources() {
       const body = `<div class="grid cols-4"><div class="card stat"><div class="stat-label">GPU 总量</div><div class="stat-value">384</div><div class="stat-meta">可用 86 卡</div></div><div class="card stat"><div class="stat-label">平均利用率</div><div class="stat-value">78.6%</div><div class="stat-meta">处于健康区间</div></div><div class="card stat"><div class="stat-label">高速互联</div><div class="stat-value">3.2Tb/s</div><div class="stat-meta">RDMA 正常</div></div><div class="card stat"><div class="stat-label">排队任务</div><div class="stat-value">12</div><div class="stat-meta warn">最长等待 28m</div></div></div><section class="section grid cols-2"><div class="card"><div class="card-pad section-head"><h2>集群拓扑</h2><span class="badge green right">全部节点在线</span></div><div class="topology"><div class="topology-grid"></div><div class="topology-map"><div class="node primary-node"><b>训练控制面</b><span>健康</span></div><div class="connector" style="left:47%;top:60px;width:44%;transform:rotate(136deg)"></div><div class="connector" style="left:47%;top:60px;width:31%;transform:rotate(116deg)"></div><div class="connector" style="left:47%;top:60px;width:31%;transform:rotate(64deg)"></div><div class="connector" style="left:47%;top:60px;width:44%;transform:rotate(43deg)"></div><div class="node n1"><b>H800 · Node 01</b><span>8 / 8 GPU</span></div><div class="node n2"><b>H800 · Node 02</b><span>6 / 8 GPU</span></div><div class="node n3"><b>H800 · Node 03</b><span>7 / 8 GPU</span></div><div class="node n4"><b>H800 · Node 04</b><span>8 / 8 GPU</span></div></div></div></div><div class="card card-pad"><div class="section-head"><h2>资源实时监控</h2><select class="field right"><option>智算集群 A</option><option>智算集群 B</option></select></div>${lineChart()}<div class="grid cols-2" style="margin-top:12px"><div><span class="table-sub">GPU 显存使用</span><div class="metric-row" style="grid-template-columns:1fr 42px"><div class="metric-bar"><i style="--value:82%;--color:var(--cyan)"></i></div><b>82%</b></div></div><div><span class="table-sub">网络带宽使用</span><div class="metric-row" style="grid-template-columns:1fr 42px"><div class="metric-bar"><i style="--value:64%;--color:var(--green)"></i></div><b>64%</b></div></div></div></div></section><section class="section">${taskTable(tasks.filter(t=>t.status==='运行中'))}</section>`;
@@ -526,7 +1269,10 @@
     function bindDynamic() {
       $$('[data-page]').forEach(el=>el.onclick=()=>{state.page=el.dataset.page;$('#app').classList.remove('mobile-open');render();});
       $$('[data-training-tab]').forEach(el=>el.onclick=()=>{state.trainingTab=el.dataset.trainingTab;render();});
-      $$('[data-algo-tab]').forEach(el=>el.onclick=()=>{state.algoTab=el.dataset.algoTab;render();});
+      $$('[data-algo-tab]').forEach(el=>el.onclick=()=>{state.algoTab=el.dataset.algoTab;state.algoSub=({graph:'pretrain',prompt:'template',reverse:'infer',fewshot:'framework'})[el.dataset.algoTab]||'pretrain';render();});
+      $$('[data-algo-sub]').forEach(el=>el.onclick=()=>{state.algoSub=el.dataset.algoSub;render();});
+      $$('[data-graph-algo]').forEach(el=>el.onclick=()=>{state.algoGraphItem=el.dataset.graphAlgo;render();});
+      $$('[data-few-cat]').forEach(el=>el.onclick=()=>{state.algoFewCat=el.dataset.fewCat;render();});
       $$('[data-task-filter]').forEach(el=>el.onclick=()=>{state.taskFilter=el.dataset.taskFilter;render();});
       $$('[data-task]').forEach(el=>el.onclick=()=>taskDetail(el.dataset.task));
       $$('[data-model]').forEach(el=>el.onclick=()=>modelDetail(el.dataset.model));
@@ -537,6 +1283,13 @@
       if(mt) mt.onchange=()=>{$('#modelGrid').innerHTML=modelCards(mt.value==='全部模型类型'?models:models.filter(m=>m.type===mt.value));bindDynamic();};
       const rt=$('#reverseText');
       if(rt) rt.oninput=()=>$('#charCount').textContent=`${rt.value.length} 字`;
+      const ts=$('#tempSlider'); if(ts) ts.oninput=()=>$('#tempVal').textContent=ts.value;
+      const tp=$('#toppSlider'); if(tp) tp.oninput=()=>$('#toppVal').textContent=tp.value;
+      const gt=$('#graphTaskType'); if(gt) gt.onchange=()=>{const hints={'edge':'边对比预测 — 通过对比正样本边和负采样边学习节点表示，适用于链路预测和节点分类等下游任务。','subgraph':'子图对比预测 — 通过对比子图级视图学习图级表示，适用于图分类与图相似度计算等下游任务。'};$('#graphTaskHint').innerHTML=`<b>${gt.value==='edge'?'边对比预测':'子图对比预测'}</b><br><small>${hints[gt.value]}</small>`;};
+      const gds=$('#graphDataSource'); if(gds) gds.onchange=()=>{const api=$('#graphApiConfig'); if(api) api.style.display=gds.value==='api'?'block':'none';};
+      const gds2=$('#graphDocSearch'); if(gds2) gds2.oninput=()=>{const q=gds2.value.toLowerCase().trim(); if(!q){$$('.doc-content mark').forEach(m=>{m.replaceWith(document.createTextNode(m.textContent))});return;} $$('.doc-content p, .doc-content li').forEach(el=>{const orig=el.textContent; if(orig.toLowerCase().includes(q)){const re=new RegExp(q,'gi'); el.innerHTML=orig.replace(re,m=>`<mark style="background:#ffeb3b;padding:1px 3px;border-radius:2px">${m}</mark>`);}});};
+      const fct=$('#fewChartType'); if(fct) fct.onchange=()=>{toast(fct.value==='radar'?'已切换为雷达图对比视图':'已切换为柱状图对比视图');};
+      const fcd=$('#fewChartDim'); if(fcd) fcd.onchange=()=>{toast(`已切换对比维度：${fcd.options[fcd.selectedIndex].text}`);};
       $$('[data-action]').forEach(el=>el.onclick=()=>handleAction(el.dataset.action,el));
     }
     function handleAction(action, el) {
@@ -568,9 +1321,134 @@
       } else if(action==='analyzeReverse') {
         if(!$('#reverseText').value.trim()){toast('请先输入或加载待分析文本','warn');return;}
         const result=$('#reverseResult'); result.innerHTML='<div class="empty">正在使用 Qwen 系列专用适配策略分析…</div>';
-        setTimeout(()=>result.innerHTML=`<div class="section-head"><h2>推断结果</h2><span class="badge green right">置信度 87%</span></div><div class="form-row"><label>重构提示词</label><textarea class="field" rows="5">请以学术摘要的风格，总结以下研究工作的核心方法、技术创新及实验结果，突出关键指标。</textarea></div><div style="margin-top:14px"><label class="table-sub">关键指令</label><div class="chips" style="margin-top:7px"><span class="chip">学术摘要</span><span class="chip">核心方法</span><span class="chip">实验指标</span></div></div><div style="margin-top:14px"><label class="table-sub">意图分类</label><div class="chips" style="margin-top:7px"><span class="badge blue">摘要生成</span><span class="badge">信息抽取</span></div></div>`,700);
+        setTimeout(()=>result.innerHTML=`<div class="section-head"><h2>推断结果</h2></div>
+          <div class="card card-pad" style="margin-bottom:14px"><div class="section-head"><h2>整体置信度评分</h2></div><div style="display:flex;align-items:center;gap:14px"><div class="progress" style="flex:1;height:14px;border-radius:7px"><i style="--value:87%;--color:var(--green)"></i></div><b style="font-size:18px;color:var(--green)">87%</b></div></div>
+          <div class="form-row"><label>重构提示词 <button class="btn small right" data-action="reverseCopyPrompt">一键复制</button></label><textarea class="field" rows="4">请以学术摘要的风格，<mark style="background:#ffeb3b;padding:1px 3px;border-radius:2px">总结以下内容</mark>的核心方法、技术创新及实验结果，突出关键指标。</textarea></div>
+          <div style="margin-top:14px"><label class="table-sub">关键指令（已高亮标识）</label><div class="chips" style="margin-top:7px"><span class="chip" style="background:#fff5df;border-color:var(--amber)">总结以下内容</span><span class="chip" style="background:#fff5df;border-color:var(--amber)">突出关键指标</span></div></div>
+          <div style="margin-top:14px"><label class="table-sub">意图分类</label><div class="chips" style="margin-top:7px"><span class="badge blue">摘要生成</span><span class="badge">信息抽取</span></div></div>
+          <div class="section-head" style="margin-top:18px"><h2>分项置信度评估</h2></div>
+          <div class="card card-pad" style="margin-top:8px">
+            <div class="metric-row"><span>重构提示词置信度</span><div class="metric-bar"><i style="--value:89%;--color:var(--green)"></i></div><b>89%</b></div>
+            <div class="metric-row"><span>指令识别置信度</span><div class="metric-bar"><i style="--value:92%;--color:var(--green)"></i></div><b>92%</b></div>
+            <div class="metric-row"><span>意图分类置信度</span><div class="metric-bar"><i style="--value:83%;--color:var(--cyan)"></i></div><b>83%</b></div>
+            <div class="metric-row"><span>风格推断置信度</span><div class="metric-bar"><i style="--value:78%;--color:var(--amber)"></i></div><b>78%</b></div>
+          </div>`,700);
       } else if(action==='serviceDetail') {
         openDrawer(el.dataset.name, `<div style="margin-bottom:18px">${badge('在线')}</div><div class="summary-list"><div class="summary-row"><span>服务版本</span><b>v2.5.3</b></div><div class="summary-row"><span>当前实例</span><b>4</b></div><div class="summary-row"><span>自动伸缩</span><b>2–12 实例</b></div><div class="summary-row"><span>P95 延迟</span><b>218 ms</b></div><div class="summary-row"><span>今日请求</span><b>2.84M</b></div></div>${lineChart()}`);
+      } else if(action==='graphStartTrain') {
+        toast('预训练任务已创建，正在初始化计算资源…');
+      } else if(action==='graphPause') {
+        toast('训练任务已暂停，可随时恢复');
+      } else if(action==='graphStop') {
+        toast('训练任务已停止，模型快照已保存');
+      } else if(action==='graphModelDetail') {
+        openDrawer(el.dataset.name+' · 模型详情', `<div class="summary-list"><div class="summary-row"><span>模型名称</span><b>${el.dataset.name}</b></div><div class="summary-row"><span>创建时间</span><b>2026-07-28</b></div><div class="summary-row"><span>编码器</span><b>GCN (2层)</b></div><div class="summary-row"><span>隐藏维度</span><b>64</b></div><div class="summary-row"><span>损失函数</span><b>InfoNCE Loss</b></div><div class="summary-row"><span>优化器</span><b>Adam (lr=0.01)</b></div><div class="summary-row"><span>最终准确率</span><b style="color:var(--green)">92.3%</b></div><div class="summary-row"><span>F1 分数</span><b>91.1%</b></div></div><div style="margin-top:14px">${lineChart()}</div>`);
+      } else if(action==='graphExportOne' || action==='graphExportModel') {
+        toast(`模型「${el.dataset.name||'选中'}」正在打包导出（.pth / ONNX）`);
+      } else if(action==='graphUseAlgo') {
+        toast(`已加载 ${el.dataset.name} 默认参数模板，请在下方配置并提交`);
+      } else if(action==='graphSubmitExp') {
+        toast(`${el.dataset.name} 实验已提交，当前队列前序 2 个任务，预估等待 8 分钟`);
+      } else if(action==='graphExpDetail') {
+        openDrawer('实验详情 · '+el.dataset.id, `<div class="summary-list"><div class="summary-row"><span>任务ID</span><b>${el.dataset.id}</b></div><div class="summary-row"><span>状态</span><b>已完成</b></div><div class="summary-row"><span>算法</span><b>GCN</b></div><div class="summary-row"><span>训练轮次</span><b>200</b></div><div class="summary-row"><span>学习率</span><b>0.01</b></div><div class="summary-row"><span>最终准确率</span><b>92.3%</b></div></div>`);
+      } else if(action==='graphExpResult') {
+        state.algoSub='algolib'; render();
+      } else if(action==='graphExpLog') {
+        openModal('失败日志 · '+el.dataset.id, `<div class="log">[ERROR] CUDA out of memory. Tried to allocate 2.00 GiB\n[INFO] GPU 0 has 1.20 GiB free\n[TIP] 建议减小批次采样大小或隐藏单元维度</div>`, '关闭');
+      } else if(action==='graphExpClone') {
+        toast('已基于该任务配置创建新实验，可修改参数后提交');
+      } else if(action==='graphNewExp') {
+        openModal('新建图学习实验', `<div class="form-grid"><div class="form-row full"><label>实验名称</label><input class="field" placeholder="如：GAT节点分类实验"></div><div class="form-row"><label>选择算法</label><select class="field"><option>GCN</option><option>GAT</option><option>GraphSAGE</option><option>GIN</option><option>Graph2vec</option></select></div><div class="form-row"><label>数据集</label><select class="field"><option>Cora</option><option>PubMed</option><option>CiteSeer</option></select></div></div>`, '创建', ()=>toast('实验已创建，请配置参数并提交'));
+      } else if(action==='graphTestApi') {
+        toast('正在测试外部数据源连接…');
+        setTimeout(()=>toast('连接成功！外部数据源可访问，已获取图结构信息'),1500);
+      } else if(action==='graphEncoderDetail') {
+        const enc=$('#graphEncoder')?.value||'GCN';
+        openModal(enc.split(' — ')[0]+' 编码器结构示意图', `<div style="text-align:center"><svg width="360" height="160" style="background:#f0f4fa;border-radius:8px"><rect x="20" y="50" width="70" height="50" fill="#1767f2" rx="6"/><text x="55" y="80" text-anchor="middle" fill="white" font-size="12">Input Layer</text><text x="55" y="95" text-anchor="middle" fill="white" font-size="9">N×F</text><rect x="130" y="40" width="70" height="70" fill="#16a6c7" rx="6"/><text x="165" y="72" text-anchor="middle" fill="white" font-size="11">Graph Conv</text><text x="165" y="88" text-anchor="middle" fill="white" font-size="9">F→H</text><rect x="240" y="50" width="50" height="50" fill="#d98a08" rx="6"/><text x="265" y="80" text-anchor="middle" fill="white" font-size="10">ReLU</text><rect x="320" y="50" width="60" height="50" fill="#16a36a" rx="6"/><text x="350" y="80" text-anchor="middle" fill="white" font-size="11">Output</text><line x1="90" y1="75" x2="130" y2="75" stroke="#7d8a9f" marker-end="url(#a)"/><line x1="200" y1="75" x2="240" y2="75" stroke="#7d8a9f"/><line x1="290" y1="75" x2="320" y2="75" stroke="#7d8a9f"/></svg></div><div class="preview-box" style="margin-top:12px"><b>详细参数说明</b><br>输入维度 F：取决于节点特征维度（Cora: 1433）<br>隐藏维度 H：可配置，默认 64<br>输出维度：取决于类别数或嵌入维度<br>层数：建议 2-3 层，过深会导致过平滑<br>激活函数：ReLU 或 LeakyReLU<br>Dropout：防止过拟合，建议 0.3-0.8</div>`, '关闭');
+      } else if(action==='graphExpDelete') {
+        openModal('确认删除', `<p>确定要删除实验 ${el.dataset.id} 吗？此操作不可撤销。</p>`, '删除', ()=>toast(`实验 ${el.dataset.id} 已删除`));
+      } else if(action==='graphZoomImage') {
+        openModal('图片放大查看', `<img src="${el.src}" style="width:100%;border-radius:7px">`, '关闭');
+      } else if(action==='graphApiDebug') {
+        toast('请求已发送，等待返回结果…');
+        setTimeout(()=>toast('响应 200 OK · task_id=GE-006 · status=queued · eta=12m'),1200);
+      } else if(action==='graphDownloadCode') {
+        toast('代码包正在打包下载（含 README.md 环境配置说明）');
+      } else if(action==='copyCode') {
+        const code=el.parentElement.textContent.replace('复制','').trim();
+        navigator.clipboard?.writeText(code); toast('代码已复制到剪贴板');
+      } else if(action==='promptPreview') {
+        openModal('模板预览', `<div class="form-grid"><div class="form-row full"><label>变量 input 示例值</label><input class="field" value="近年来大模型在科技情报领域的应用日益广泛…"></div><div class="form-row full"><label>变量 format 示例值</label><input class="field" value='{"tech":"关键技术","org":"研究机构","trend":"趋势"}'></div></div><div class="preview-box" style="margin-top:14px"><b>填充后的完整提示</b><br>你是一名科技情报分析专家。请根据以下材料提取关键技术、研究机构与潜在趋势，并以 JSON 格式输出。<br><br>材料：近年来大模型在科技情报领域的应用日益广泛…<br>输出格式：{"tech":"关键技术","org":"研究机构","trend":"趋势"}</div>`, '关闭');
+      } else if(action==='promptSaveTpl') {
+        openModal('保存模板', `<div class="form-grid"><div class="form-row full"><label>模板名称</label><input class="field" value="科技情报抽取模板"></div><div class="form-row"><label>任务类别</label><select class="field"><option>信息抽取</option><option>文本生成</option><option>对话生成</option><option>代码生成</option></select></div><div class="form-row"><label>标签</label><input class="field" value="JSON, 实体, 关系"></div></div>`, '保存', ()=>toast('模板已保存至模板库'));
+      } else if(action==='promptLoadTpl') {
+        toast(`已加载模板「${el.dataset.name}」到编辑器`);
+      } else if(action==='promptTest') {
+        toast('测试任务已提交，模型正在生成…');
+      } else if(action==='promptSelectModel') {
+        toast(`已选择模型 ${el.dataset.name}，连接状态：就绪`);
+      } else if(action==='promptUploadSample') {
+        toast('样本文件上传成功，已解析 50 条标注样本');
+      } else if(action==='promptStartOpt') {
+        toast('优化任务已启动，请查看右侧进度面板');
+      } else if(action==='promptApplyOpt') {
+        toast('优化后的提示已应用至当前编辑器模板');
+      } else if(action==='promptGenVariant') {
+        toast('已生成 4 个提示变体，正在批量并行测试…');
+      } else if(action==='promptExportJson') {
+        toast('配置已导出为 JSON 文件（含模板、模型、任务类型、性能指标）');
+      } else if(action==='promptImportJson') {
+        openModal('导入配置', `<div class="form-row"><label>选择 JSON 文件</label><div style="border:2px dashed #dce4ef;border-radius:7px;padding:20px;text-align:center;color:var(--muted);cursor:pointer"><p>${icon('plus',24)}</p><small>点击上传 .json 配置文件</small></div></div>`, '导入', ()=>toast('配置导入成功，模板已加载到编辑器'));
+      } else if(action==='promptSelectTask') {
+        toast(`已选择任务类型：${el.dataset.task}，已加载预设提示模板`);
+      } else if(action==='promptRunTest') {
+        toast('模型推理完成，结果已展示');
+      } else if(action==='promptUploadBatch') {
+        toast('批量文件已上传，系统正在逐条处理（共 128 条）');
+      } else if(action==='promptDownloadBatch') {
+        toast('批量测试结果文件已开始下载（CSV 格式）');
+      } else if(action==='promptCopy') {
+        const t=$('#promptText'); if(t){t.select(); document.execCommand('copy'); toast('模板内容已复制');}
+      } else if(action==='promptPaste') {
+        toast('请使用 Ctrl+V 粘贴内容到编辑器');
+      } else if(action==='promptFind') {
+        openModal('查找', `<div class="form-row"><label>查找内容</label><input class="field" id="findInput" placeholder="输入要查找的文本"></div>`, '查找', ()=>{const t=$('#promptText');const q=$('#findInput').value; if(t&&q&&t.value.includes(q)){toast(`找到 "${q}"，已定位`);}else{toast('未找到匹配内容','warn');}});
+      } else if(action==='promptReplace') {
+        openModal('查找与替换', `<div class="form-row"><label>查找</label><input class="field" id="findInput2" placeholder="查找内容"></div><div class="form-row"><label>替换为</label><input class="field" id="replaceInput" placeholder="替换内容"></div>`, '替换', ()=>{const t=$('#promptText');const f=$('#findInput2').value;const r=$('#replaceInput').value; if(t&&f){t.value=t.value.replaceAll(f,r); toast('已替换所有匹配项');}});
+      } else if(action==='promptGenApi') {
+        openModal('API 接口文档', `<div class="preview-box"><b>请求 URL</b><br>POST https://api.maas.platform/prompt/run</div><div class="preview-box" style="margin-top:8px"><b>请求体格式</b><br>{"template_id":"tpl_001","input":"文本内容","model":"Qwen2.5-7B"}</div><div class="preview-box" style="margin-top:8px"><b>返回结构</b><br>{"result":"模型输出","latency_ms":420}</div><div class="code-block" style="margin-top:10px"><button class="copy-btn" data-action="copyCode">复制</button>curl -X POST https://api.maas.platform/prompt/run \\ -H "Content-Type: application/json" \\ -d '{"template_id":"tpl_001","input":"文本"}'</div>`, '关闭');
+      } else if(action==='reverseSelectModel') {
+        toast(`已选择 ${el.dataset.name}，适配状态：${el.querySelector('.badge')?.textContent||'已优化支持'}`);
+      } else if(action==='reverseCopyPrompt') {
+        toast('提示词已复制到剪贴板');
+      } else if(action==='reverseCompareModels') {
+        openModal('多模型策略对比', `<div class="table-wrap"><table><thead><tr><th>模型</th><th>重构提示词</th><th>置信度</th></tr></thead><tbody><tr><td>Qwen2.5</td><td>请以学术摘要风格总结…</td><td>87%</td></tr><tr><td>GLM-4</td><td>请以综述风格概括…</td><td>83%</td></tr><tr><td>DeepSeek-V3</td><td>请提炼核心方法与指标…</td><td>85%</td></tr></tbody></table></div>`, '关闭');
+      } else if(action==='reverseSelectScene') {
+        toast(`已选择任务场景：${el.dataset.scene}，已应用对应分析策略`);
+      } else if(action==='fewSelectModel') {
+        state.algoFewItem=el.dataset.name; render();
+      } else if(action==='fewSaveConfig') {
+        openModal('保存配置', `<div class="form-row"><label>配置名称</label><input class="field" value="文本分类-原型网络-最优配置"></div>`, '保存', ()=>toast('配置已保存至个人配置库'));
+      } else if(action==='fewLoadConfig') {
+        openModal('加载配置', `<div class="form-row"><label>选择已保存配置</label><select class="field"><option>文本分类-原型网络-最优配置</option><option>图文匹配-RelationNet-基准</option><option>元学习-MAML-快速适配</option></select></div>`, '加载', ()=>toast('配置已加载，参数已自动填充'));
+      } else if(action==='fewDeleteConfig') {
+        toast('配置已删除');
+      } else if(action==='fewStartEval') {
+        toast('评估任务已启动，请查看下方监控面板');
+      } else if(action==='fewSelectDownTask') {
+        toast(`已选择任务：${el.dataset.task}，已加载标准化数据格式模板`);
+      } else if(action==='fewUploadData') {
+        openModal('数据上传结果', `<div class="preview-box" style="border-color:var(--green)"><b>✓ 格式校验通过</b><br><small>文件类型：CSV · 记录数：4,200 · 字段：text, label<br>系统已自动解析并在下方展示前 10 行预览。</small></div><div class="preview-box" style="margin-top:8px;border-color:var(--amber)"><b>⚠ 格式错误提示示例（若上传格式有误）</b><br><small style="color:var(--amber)">如上传的文件缺少 label 列，系统将提示：「第 3 行缺少必填字段 label，请检查数据格式是否符合模板要求。」并拒绝导入，直到格式修正。</small></div>`, '关闭');
+      } else if(action==='fewPauseTrain') {
+        toast('训练已暂停，当前模型快照已保存');
+      } else if(action==='fewModelDetail') {
+        openModal(el.dataset.model + ' · 详细结果分析', `<div class="summary-list"><div class="summary-row"><span>模型</span><b>${el.dataset.model}</b></div><div class="summary-row"><span>准确率</span><b>${el.dataset.model==='Prototypical Networks'?'62.4%':el.dataset.model==='MAML'?'48.7%':'50.4%'}</b></div><div class="summary-row"><span>最优类别</span><b>AI（94.2%）</b></div><div class="summary-row"><span>最弱类别</span><b>Material（51.3%）</b></div></div><div class="section-head" style="margin-top:14px"><h2>错误分类样本案例</h2></div><div class="table-wrap" style="margin-top:8px"><table><thead><tr><th>样本内容</th><th>真实标签</th><th>预测标签</th><th>置信度</th></tr></thead><tbody><tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">基于碳纳米管的柔性传感器研究</td><td><span class="chip">Material</span></td><td><span class="chip" style="background:#ffedef">AI</span></td><td>52.1%</td></tr><tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">量子退火算法在组合优化中的应用</td><td><span class="chip">Physics</span></td><td><span class="chip" style="background:#ffedef">AI</span></td><td>48.7%</td></tr><tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">蛋白质折叠的深度学习预测方法</td><td><span class="chip">Biology</span></td><td><span class="chip" style="background:#ffedef">AI</span></td><td>55.3%</td></tr></tbody></table></div><div class="preview-box" style="margin-top:10px"><b>分析建议</b><br><small>该模型在 Material、Physics 类别上存在混淆，建议增加相关领域的支持集样本或调整嵌入维度。</small></div>`, '关闭');
+      } else if(action==='fewInference') {
+        toast('推理完成，预测类别：AI · 置信度 94.2%');
+      } else if(action==='openChecklist') {
+        window.open('核对书.html', '_blank');
+      } else if(action==='algoDocs') {
+        state.algoSub=({graph:'docs',prompt:'downstream',reverse:'adapt',fewshot:'docs'})[state.algoTab]||'docs'; render();
       } else {
         toast('该功能入口已保留，可在下一版补充详细流程');
       }
