@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>超大规模智算引擎 · MaaS 管理平台</title>
+  <style>
+    :root {
+      --primary: #1767f2;
+      --primary-strong: #0f55da;
+      --primary-soft: #eaf3ff;
+      --cyan: #16a6c7;
+      --green: #16a36a;
+      --amber: #d98a08;
+      --red: #db3b45;
+      --ink: #17253d;
+      --text: #3a475b;
+      --muted: #7d8a9f;
+      --line: #e4eaf3;
+      --surface: #ffffff;
+      --surface-soft: #f6f9fd;
+      --sidebar: 244px;
+      --radius: 8px;
+      --shadow: 0 10px 30px rgba(33, 70, 122, .08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(140deg, rgba(222, 237, 255, .92), rgba(247, 250, 255, .9) 46%, rgba(228, 241, 255, .88));
+      font-size: 14px;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    svg { display: block; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: var(--sidebar) 1fr; transition: .22s ease; }
+    .app.collapsed { --sidebar: 72px; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow: hidden;
+      padding: 20px 14px; border-right: 1px solid rgba(255,255,255,.65);
+      background: rgba(234, 243, 255, .72); backdrop-filter: blur(20px);
+      z-index: 20;
+    }
+    .brand { height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 8px 16px; color: #1d3558; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+      background: #fff; color: var(--primary); border: 2px solid currentColor;
+      box-shadow: inset 0 0 0 4px #dbe9ff; flex: none;
+    }
+    .brand-title { font-size: 16px; line-height: 1.35; font-weight: 750; white-space: nowrap; }
+    .nav-label { color: #9aa6b7; font-size: 11px; padding: 16px 12px 7px; white-space: nowrap; }
+    .nav { display: grid; gap: 5px; }
+    .nav-item {
+      width: 100%; border: 0; background: transparent; color: #516078;
+      display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px;
+      border-radius: 8px; text-align: left; white-space: nowrap; transition: .16s ease;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.62); color: var(--ink); }
+    .nav-item.active {
+      color: var(--primary); background: rgba(255,255,255,.88); font-weight: 650;
+      box-shadow: 0 7px 18px rgba(46, 92, 153, .08);
+    }
+    .nav-item .ico { width: 20px; height: 20px; flex: none; }
+    .nav-item .nav-text { overflow: hidden; text-overflow: ellipsis; }
+    .nav-item .count { margin-left: auto; font-size: 11px; padding: 2px 6px; border-radius: 10px; background: #e6edf7; }
+    .sidebar-foot { position: absolute; bottom: 18px; left: 14px; right: 14px; }
+    .help-card { background: rgba(255,255,255,.65); border: 1px solid rgba(255,255,255,.9); padding: 12px; border-radius: 8px; white-space: nowrap; }
+    .help-card b { display: block; color: var(--ink); margin-bottom: 4px; }
+    .help-card span { color: var(--muted); font-size: 12px; }
+    .app.collapsed .brand-title, .app.collapsed .nav-label, .app.collapsed .nav-text,
+    .app.collapsed .nav-item .count, .app.collapsed .help-card { display: none; }
+    .app.collapsed .sidebar { padding-inline: 10px; }
+    .app.collapsed .brand { justify-content: center; padding-inline: 0; }
+    .app.collapsed .nav-item { justify-content: center; padding: 0; }
+
+    .workspace { min-width: 0; padding: 0 24px 28px; }
+    .topbar {
+      height: 76px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0;
+      z-index: 15; background: linear-gradient(180deg, rgba(236,245,255,.96), rgba(236,245,255,.76), transparent);
+    }
+    .icon-btn {
+      width: 36px; height: 36px; border: 1px solid transparent; border-radius: 7px;
+      background: transparent; color: #53627a; display: grid; place-items: center;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,.8); border-color: #dfe8f4; }
+    .top-search {
+      margin-left: 8px; width: min(430px, 42vw); height: 38px; border: 1px solid rgba(215,226,241,.9);
+      background: rgba(255,255,255,.72); border-radius: 7px; display: flex; align-items: center; padding: 0 11px; color: #9aa6b7;
+    }
+    .top-search input { flex: 1; border: 0; outline: 0; background: transparent; padding: 0 9px; min-width: 0; color: var(--ink); }
+    .kbd { border: 1px solid #dbe3ee; background: #fff; border-radius: 5px; padding: 2px 6px; font-size: 11px; color: #8894a7; }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .status-pill { display: flex; align-items: center; gap: 7px; color: #58667b; padding: 7px 10px; border: 1px solid #dfe7f2; background: rgba(255,255,255,.68); border-radius: 20px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(22,163,106,.12); }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(145deg, #2577f5, #52b7dc); color: #fff; display: grid; place-items: center; font-weight: 700; border: 2px solid #fff; }
+    .page { background: rgba(250,252,255,.74); border: 1px solid rgba(255,255,255,.92); border-radius: 12px; box-shadow: var(--shadow); min-height: calc(100vh - 104px); overflow: hidden; }
+    .page-head {
+      min-height: 84px; display: flex; align-items: center; gap: 14px; padding: 20px 26px;
+      border-bottom: 1px solid rgba(225,233,244,.95); background: rgba(255,255,255,.55);
+    }
+    .page-title { min-width: 0; }
+    .breadcrumb { color: #8b97a8; font-size: 12px; margin-bottom: 7px; }
+    .page-title h1 { margin: 0; color: var(--ink); font-size: 22px; line-height: 1.2; }
+    .page-title p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .head-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .content { padding: 22px 26px 30px; }
+    .btn {
+      height: 36px; padding: 0 14px; border-radius: 7px; border: 1px solid #dbe3ee;
+      background: #fff; color: #435169; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      transition: .15s ease; white-space: nowrap;
+    }
+    .btn:hover { border-color: #adc6eb; color: var(--primary); }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 5px 13px rgba(23,103,242,.18); }
+    .btn.primary:hover { background: var(--primary-strong); }
+    .btn.danger { color: var(--red); }
+    .btn.small { height: 30px; padding: 0 10px; font-size: 12px; }
+    .btn.ghost { border-color: transparent; background: transparent; }
+    .grid { display: grid; gap: 16px; }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { background: rgba(255,255,255,.9); border: 1px solid var(--line); border-radius: var(--radius); }
+    .card-pad { padding: 18px; }
+    .section { margin-top: 20px; }
+    .section:first-child { margin-top: 0; }
+    .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .section-head h2 { margin: 0; color: var(--ink); font-size: 16px; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .section-head .right { margin-left: auto; }
+    .stat { padding: 17px 18px; position: relative; overflow: hidden; }
+    .stat::after { content: ""; position: absolute; width: 76px; height: 76px; border-radius: 50%; background: var(--tint, #edf4ff); right: -28px; top: -28px; }
+    .stat-label { color: var(--muted); margin-bottom: 10px; }
+    .stat-value { color: var(--ink); font-size: 27px; font-weight: 750; letter-spacing: -.5px; }
+    .stat-meta { margin-top: 8px; font-size: 12px; color: var(--green); }
+    .stat-meta.warn { color: var(--amber); }
+    .module-card { padding: 18px; display: flex; flex-direction: column; min-height: 180px; transition: .18s ease; cursor: pointer; }
+    .module-card:hover { border-color: #bad1f5; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(39,83,145,.08); }
+    .module-top { display: flex; align-items: center; gap: 11px; }
+    .module-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 8px; background: var(--primary-soft); color: var(--primary); }
+    .module-card h3 { margin: 0; color: var(--ink); font-size: 15px; }
+    .module-card p { color: var(--muted); line-height: 1.65; margin: 13px 0 14px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+    .chip, .badge { padding: 4px 8px; border-radius: 5px; font-size: 11px; background: #f0f4f9; color: #5d6c82; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; }
+    .badge.green { background: #e7f8f0; color: #11855a; }
+    .badge.blue { background: #eaf3ff; color: #1767f2; }
+    .badge.amber { background: #fff5df; color: #a96800; }
+    .badge.red { background: #ffedef; color: #c8313c; }
+    .workflow { padding: 20px; display: grid; grid-template-columns: repeat(6, minmax(95px,1fr)); gap: 6px; overflow-x: auto; }
+    .flow-step { position: relative; text-align: center; min-width: 95px; }
+    .flow-step:not(:last-child)::after { content: ""; height: 1px; background: #bfd3ef; position: absolute; top: 17px; left: 65%; right: -35%; }
+    .flow-dot { width: 34px; height: 34px; border-radius: 50%; margin: 0 auto 9px; background: #fff; border: 1px solid #bfd3ef; color: var(--primary); display: grid; place-items: center; font-weight: 700; position: relative; z-index: 1; }
+    .flow-step.done .flow-dot { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .flow-step b { display: block; color: var(--ink); font-size: 12px; }
+    .flow-step span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 13px; }
+    .field { height: 36px; border: 1px solid #dce4ef; border-radius: 7px; padding: 0 11px; background: #fff; color: var(--ink); outline: none; }
+    .field:focus, textarea.field:focus { border-color: #8eb7f4; box-shadow: 0 0 0 3px rgba(23,103,242,.08); }
+    textarea.field { height: auto; padding: 10px 11px; resize: vertical; }
+    .search-field { min-width: 230px; flex: 1; max-width: 390px; }
+    .table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th { background: #f7f9fc; color: #66748a; font-weight: 650; text-align: left; height: 42px; padding: 0 14px; border-bottom: 1px solid var(--line); font-size: 12px; }
+    td { height: 52px; padding: 8px 14px; border-bottom: 1px solid #edf1f6; color: #435169; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fbfdff; }
+    .table-title { color: var(--ink); font-weight: 600; }
+    .table-sub { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .actions { display: flex; gap: 4px; }
+    .link { border: 0; background: transparent; color: var(--primary); padding: 3px 5px; }
+    .link.red { color: var(--red); }
+    .progress { width: 112px; height: 6px; background: #edf1f6; border-radius: 4px; overflow: hidden; }
+    .progress > i { display: block; height: 100%; width: var(--value); background: var(--primary); border-radius: inherit; }
+    .split { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; }
+    .form-row label { color: #526177; font-size: 12px; display: block; margin-bottom: 7px; }
+    .form-row .field { width: 100%; }
+    .form-row.full { grid-column: 1 / -1; }
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: -4px 0 18px; overflow-x: auto; }
+    .tab { height: 42px; border: 0; background: transparent; padding: 0 15px; color: #718096; white-space: nowrap; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--primary); border-color: var(--primary); font-weight: 650; }
+    .summary-list { display: grid; gap: 12px; }
+    .summary-row { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 11px; border-bottom: 1px solid #edf1f6; }
+    .summary-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .summary-row span { color: var(--muted); }
+    .summary-row b { color: var(--ink); text-align: right; font-weight: 650; }
+    .model-grid { grid-template-columns: repeat(auto-fit, minmax(235px,1fr)); }
+    .model-card { padding: 16px; }
+    .model-card-head { display: flex; align-items: flex-start; gap: 10px; }
+    .model-logo { width: 38px; height: 38px; border-radius: 8px; background: #eff5ff; color: var(--primary); display: grid; place-items: center; font-weight: 800; flex: none; }
+    .model-card h3 { margin: 0 0 4px; color: var(--ink); font-size: 14px; }
+    .model-card p { color: var(--muted); font-size: 12px; line-height: 1.55; min-height: 56px; }
+    .model-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+    .model-foot { display: flex; gap: 6px; margin-top: 14px; padding-top: 13px; border-top: 1px solid #edf1f6; }
+    .chart { height: 210px; position: relative; padding: 14px 12px 26px 38px; overflow: hidden; }
+    .chart-grid { position: absolute; inset: 14px 12px 26px 38px; background: repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #edf1f6 40px); border-left: 1px solid #edf1f6; border-bottom: 1px solid #edf1f6; }
+    .chart svg { width: 100%; height: 100%; overflow: visible; position: relative; z-index: 1; }
+    .metric-row { display: grid; grid-template-columns: 110px 1fr 44px; gap: 10px; align-items: center; margin: 12px 0; }
+    .metric-bar { height: 8px; border-radius: 4px; background: #edf1f6; overflow: hidden; }
+    .metric-bar i { display: block; height: 100%; width: var(--value); background: var(--color, var(--primary)); border-radius: inherit; }
+    .topology { min-height: 260px; padding: 20px; position: relative; background: linear-gradient(#f8fbff, #fff); overflow: hidden; }
+    .topology-grid { position: absolute; inset: 0; opacity: .45; background-image: linear-gradient(#e8eff8 1px, transparent 1px), linear-gradient(90deg,#e8eff8 1px,transparent 1px); background-size: 24px 24px; }
+    .topology-map { position: relative; z-index: 1; height: 220px; }
+    .node { position: absolute; width: 96px; padding: 9px; border: 1px solid #cfe0f6; border-radius: 7px; background: #fff; box-shadow: 0 5px 12px rgba(50,90,145,.07); text-align: center; }
+    .node b { color: var(--ink); display: block; font-size: 12px; }
+    .node span { color: var(--green); font-size: 11px; }
+    .node.primary-node { left: 42%; top: 8px; border-color: #8cb7f2; }
+    .node.n1 { left: 8%; top: 125px; }.node.n2 { left: 31%; top: 125px; }.node.n3 { left: 56%; top: 125px; }.node.n4 { right: 7%; top: 125px; }
+    .connector { position: absolute; height: 1px; background: #aac6ea; transform-origin: left; z-index: 0; }
+    .coverage { display: grid; gap: 8px; }
+    .coverage-group { border: 1px solid var(--line); border-radius: 7px; background: #fff; overflow: hidden; }
+    .coverage-head { min-height: 48px; padding: 0 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .coverage-head strong { color: var(--ink); }
+    .coverage-head .badge { margin-left: auto; }
+    .coverage-body { display: none; padding: 4px 14px 14px 48px; }
+    .coverage-group.open .coverage-body { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px 14px; }
+    .coverage-item { color: #65738a; font-size: 12px; padding: 6px 0; display: flex; gap: 7px; }
+    .check { color: var(--green); font-weight: 800; }
+    .empty { text-align: center; padding: 46px 20px; color: var(--muted); }
+    .modal-mask, .drawer-mask {
+      position: fixed; inset: 0; z-index: 60; background: rgba(20,32,52,.26); backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none; transition: .18s ease;
+    }
+    .modal-mask.show, .drawer-mask.show { opacity: 1; pointer-events: auto; }
+    .modal {
+      width: min(590px, calc(100vw - 32px)); max-height: calc(100vh - 60px); overflow: auto;
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -47%); background: #fff;
+      border-radius: 10px; box-shadow: 0 24px 70px rgba(24,48,84,.24); transition: .18s ease;
+    }
+    .modal-mask.show .modal { transform: translate(-50%, -50%); }
+    .modal-head, .drawer-head { display: flex; align-items: center; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .modal-head h3, .drawer-head h3 { margin: 0; color: var(--ink); font-size: 16px; }
+    .modal-head .icon-btn, .drawer-head .icon-btn { margin-left: auto; }
+    .modal-body { padding: 20px; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 8px; }
+    .drawer {
+      position: absolute; right: 0; top: 0; bottom: 0; width: min(460px, 92vw); background: #fff;
+      transform: translateX(100%); transition: .22s ease; box-shadow: -18px 0 50px rgba(24,48,84,.14); overflow: auto;
+    }
+    .drawer-mask.show .drawer { transform: translateX(0); }
+    .drawer-body { padding: 20px; }
+    .log {
+      margin-top: 12px; padding: 14px; background: #142033; color: #c9d7ea; border-radius: 7px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; line-height: 1.75; min-height: 180px; white-space: pre-wrap;
+    }
+    .toast-stack { position: fixed; right: 22px; top: 86px; z-index: 100; display: grid; gap: 8px; }
+    .toast { min-width: 260px; padding: 12px 14px; border-radius: 8px; background: #fff; border: 1px solid #dfe7f2; box-shadow: 0 12px 34px rgba(28,57,99,.16); display: flex; gap: 9px; align-items: center; animation: toastIn .22s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-7px); } }
+    .command { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); width: min(620px, calc(100vw - 28px)); background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 24px 70px rgba(24,48,84,.25); }
+    .command input { width: 100%; height: 54px; border: 0; border-bottom: 1px solid var(--line); padding: 0 18px; outline: 0; color: var(--ink); font-size: 15px; }
+    .command-list { padding: 8px; }
+    .command-item { padding: 10px 12px; border-radius: 7px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .command-item:hover { background: var(--surface-soft); }
+    .command-item small { color: var(--muted); margin-left: auto; }
+    .mobile-nav { display: none; }
+    @media (max-width: 1100px) {
+      .grid.cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .coverage-group.open .coverage-body { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 760px) {
+      .app { display: block; }
+      .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); width: 260px; transition: .2s ease; }
+      .app.mobile-open .sidebar { transform: translateX(0); box-shadow: 18px 0 60px rgba(24,48,84,.17); }
+      .workspace { padding: 0 10px 16px; }
+      .topbar { height: 64px; }
+      .mobile-nav { display: grid; }
+      #sidebarToggle { display: none; }
+      .top-search { width: 42px; padding: 0; justify-content: center; margin-left: 0; background: transparent; border-color: transparent; }
+      .top-search input, .top-search .kbd { display: none; }
+      .status-pill { display: none; }
+      .page { min-height: calc(100vh - 78px); }
+      .page-head { padding: 16px; align-items: flex-start; }
+      .page-title h1 { font-size: 19px; }
+      .page-title p { display: none; }
+      .content { padding: 16px; }
+      .grid.cols-4, .grid.cols-3, .grid.cols-2, .form-grid { grid-template-columns: 1fr; }
+      .head-actions .btn:not(.primary) { display: none; }
+      .coverage-group.open .coverage-body { grid-template-columns: 1fr; padding-left: 18px; }
+      .workflow { justify-content: start; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-train" viewBox="0 0 24 24"><path d="M7 4h10l3 5-8 11L4 9zM4 9h16M8 4l4 16 4-16" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-model" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-task" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h5M8 16h7" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M7 15l4-4 3 2 5-7" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M14 5c2-2 5-2 5-2s0 3-2 5l-6 6-4-4zM7 10l-3 1 3 3m4 0-1 4 3-3M8 17l-2 2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-algo" viewBox="0 0 24 24"><path d="M5 7h6m2 0h6M9 4v6m6 4h4M5 14h6m4-3v6M5 20h14" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><path d="M4 4h16v6H4zm0 10h16v6H4zM7 7h.01M7 17h.01M10 7h6M10 17h6" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 12h7M9 16h7" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16h12l-1.5-2v-4a4.5 4.5 0 00-9 0v4zm4 3h4" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  </svg>
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><svg width="22" height="22"><use href="#i-model"/></svg></div>
+        <div class="brand-title">超大规模智算引擎<br><span style="font-size:12px;font-weight:500;color:#6d7b90">MaaS 管理平台</span></div>
+      </div>
+      <div class="nav-label">工作台</div>
+      <nav class="nav" id="mainNav"></nav>
+      <div class="sidebar-foot">
+        <div class="help-card"><b>标书原型大纲 v0.1</b><span>覆盖 3 大板块 · 16 个核心模块</span></div>
+      </div>
+    </aside>
+    <main class="workspace">
+      <header class="topbar">
+        <button class="icon-btn mobile-nav" id="mobileNav"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+        <button class="icon-btn" id="sidebarToggle"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+        <div class="top-search" id="commandTrigger">
+          <svg width="17" height="17"><use href="#i-search"/></svg>
+          <input type="text" placeholder="搜索模型、任务、服务与文档" readonly>
+          <span class="kbd">⌘ K</span>
+        </div>
+        <div class="top-actions">
+          <div class="status-pill"><span class="dot"></span>集群运行正常</div>
+          <button class="icon-btn" data-action="notify"><svg width="19" height="19"><use href="#i-bell"/></svg></button>
+          <div class="avatar">AI</div>
+        </div>
+      </header>
+      <section class="page" id="page"></section>
+    </main>
+  </div>
+  <div class="toast-stack" id="toastStack"></div>
+  <div class="modal-mask" id="modalMask" aria-hidden="true"></div>
+  <div class="drawer-mask" id="drawerMask" aria-hidden="true"></div>
+
+  <script>
+    const navItems = [
+      { id: 'overview', label: '平台总览', icon: 'grid' },
+      { id: 'training', label: '模型训练', icon: 'train' },
+      { id: 'models', label: '模型资产', icon: 'model' },
+      { id: 'tasks', label: '任务中心', icon: 'task', count: 6 },
+      { id: 'evaluation', label: '模型测评', icon: 'chart' },
+      { id: 'deployment', label: '推理与部署', icon: 'rocket' },
+      { id: 'algorithms', label: '算法服务', icon: 'algo' },
+      { id: 'resources', label: '资源与拓扑', icon: 'server' },
+      { id: 'coverage', label: '标书功能大纲', icon: 'doc' }
+    ];
+    const tasks = [
+      { id:'TR-20260730-018', name:'Qwen2.5-7B 科技情报微调', type:'监督微调', status:'运行中', progress:68, resource:'8 × H800', owner:'算法一组', time:'2h 18m' },
+      { id:'TR-20260730-017', name:'DeepSeek-V3 指令对齐', type:'强化学习', status:'排队中', progress:0, resource:'16 × H800', owner:'模型中心', time:'--' },
+      { id:'EV-20260730-012', name:'教育大模型综合测评', type:'自动测评', status:'运行中', progress:42, resource:'4 × A800', owner:'评测组', time:'38m' },
+      { id:'DP-20260730-009', name:'GLM-4-9B 推理服务发布', type:'部署发布', status:'已完成', progress:100, resource:'2 × H800', owner:'平台组', time:'12m' },
+      { id:'TR-20260729-042', name:'文图生成模型预训练', type:'预训练', status:'已暂停', progress:34, resource:'32 × H800', owner:'多模态组', time:'9h 52m' },
+      { id:'CV-20260729-015', name:'模型 ONNX 格式转换', type:'格式转换', status:'失败', progress:73, resource:'1 × A800', owner:'交付组', time:'16m' }
+    ];
+    const models = [
+      {name:'Qwen2.5-7B', version:'v2.5.3', type:'自回归', size:'7B', state:'可用', desc:'面向通用中英文理解、生成与领域微调的基础模型。'},
+      {name:'DeepSeek-V3', version:'v3.1', type:'MoE', size:'671B', state:'可用', desc:'混合专家架构，适用于复杂推理与高性能生成任务。'},
+      {name:'GLM-4-9B', version:'v4.0.6', type:'自回归', size:'9B', state:'可用', desc:'支持中英双语、多轮对话与工具调用的通用模型。'},
+      {name:'SciIntel-LM', version:'v0.9.2', type:'垂直模型', size:'14B', state:'训练中', desc:'面向科技情报抽取、摘要、关联分析的领域模型。'},
+      {name:'EduMind-MoE', version:'v1.2.0', type:'教育模型', size:'32B', state:'评测中', desc:'覆盖理工文医多学科的教育认知与推理模型。'},
+      {name:'VisionFusion', version:'v1.0.3', type:'多模态', size:'12B', state:'可用', desc:'支持跨模态特征对齐、图文理解和图文生成。'}
+    ];
+    const state = { page:'overview', trainingTab:'basic', algoTab:'prompt', taskFilter:'全部' };
+    const $ = (s, root=document) => root.querySelector(s);
+    const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+    const icon = (name, size=18) => `<svg class="ico" width="${size}" height="${size}"><use href="#i-${name}"/></svg>`;
+    const badge = status => {
+      const map = { '运行中':'green','已完成':'blue','排队中':'amber','已暂停':'amber','失败':'red','可用':'green','训练中':'blue','评测中':'amber','在线':'green','灰度':'amber' };
+      return `<span class="badge ${map[status]||'blue'}"><span class="dot" style="width:5px;height:5px;box-shadow:none"></span>${status}</span>`;
+    };
+    function toast(message, type='success') {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerHTML = `<span style="color:${type==='success'?'var(--green)':'var(--amber)'}">${icon(type==='success'?'check':'bell',18)}</span><span>${message}</span>`;
+      $('#toastStack').appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+    function renderNav() {
+      $('#mainNav').innerHTML = navItems.map(n => `<button class="nav-item ${state.page===n.id?'active':''}" data-page="${n.id}">${icon(n.icon)}<span class="nav-text">${n.label}</span>${n.count?`<span class="count">${n.count}</span>`:''}</button>`).join('');
+    }
+    function pageShell(title, desc, actions, body, crumb='超大规模智算引擎') {
+      return `<div class="page-head"><div class="page-title"><div class="breadcrumb">首页 / ${crumb}</div><h1>${title}</h1><p>${desc}</p></div><div class="head-actions">${actions||''}</div></div><div class="content">${body}</div>`;
+    }
+    function overview() {
+      const body = `
+        <div class="grid cols-4">
+          <div class="card stat" style="--tint:#e9f3ff"><div class="stat-label">模型资产</div><div class="stat-value">128</div><div class="stat-meta">↑ 本月新增 12 个版本</div></div>
+          <div class="card stat" style="--tint:#e9faf2"><div class="stat-label">运行中任务</div><div class="stat-value">26</div><div class="stat-meta">集群调度正常</div></div>
+          <div class="card stat" style="--tint:#fff5df"><div class="stat-label">GPU 利用率</div><div class="stat-value">78.6%</div><div class="stat-meta warn">可用算力 86 卡</div></div>
+          <div class="card stat" style="--tint:#f1edff"><div class="stat-label">在线推理服务</div><div class="stat-value">42</div><div class="stat-meta">SLA 99.98%</div></div>
+        </div>
+        <section class="section">
+          <div class="section-head"><h2>核心能力域</h2><p>依据标书功能架构梳理</p></div>
+          <div class="grid cols-3">
+            <article class="card module-card" data-page="training"><div class="module-top"><div class="module-icon">${icon('train',21)}</div><div><h3>大规模预训练框架</h3><span class="badge blue">8 个功能模块</span></div></div><p>覆盖自回归、序列到序列、文图生成、分布式训练、监督微调、强化学习、模型测评与推理交付。</p><div class="chips"><span class="chip">训练配置</span><span class="chip">过程可视化</span><span class="chip">资源调度</span></div></article>
+            <article class="card module-card" data-page="models"><div class="module-top"><div class="module-icon" style="background:#e9faf2;color:var(--green)">${icon('model',21)}</div><div><h3>超大规模预训练模型</h3><span class="badge green">5 类模型能力</span></div></div><p>统一承载中英语言、认知、多模态、科技情报与教育领域模型，提供模型服务与集成能力。</p><div class="chips"><span class="chip">中英语言</span><span class="chip">多模态</span><span class="chip">领域模型</span></div></article>
+            <article class="card module-card" data-page="algorithms"><div class="module-top"><div class="module-icon" style="background:#fff5df;color:var(--amber)">${icon('algo',21)}</div><div><h3>大模型算法服务</h3><span class="badge amber">4 类算法服务</span></div></div><p>提供图计算、提示学习、反向提示和小样本学习的一站式算法配置、实验、评估与部署能力。</p><div class="chips"><span class="chip">图计算</span><span class="chip">提示优化</span><span class="chip">小样本</span></div></article>
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>模型生产业务流程</h2><p>数据到服务的端到端闭环</p><button class="btn small right" data-page="coverage">查看标书覆盖</button></div>
+          <div class="card workflow">
+            ${['数据处理','预训练','监督微调','强化学习','模型测评','部署发布'].map((x,i)=>`<div class="flow-step ${i<4?'done':''}"><div class="flow-dot">${i+1}</div><b>${x}</b><span>${['清洗 · 标注 · 质检','架构 · 参数 · 训练','领域数据 · PEFT','RLHF · 奖励模型','指标 · 报告 · 对比','压缩 · 发布 · 监控'][i]}</span></div>`).join('')}
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h2>进行中的任务</h2><button class="btn small right" data-page="tasks">全部任务</button></div>
+          ${taskTable(tasks.slice(0,4))}
+        </section>`;
+      return pageShell('平台总览','统一管理大模型训练、评测、推理与算法服务全生命周期。',`<button class="btn" data-page="coverage">${icon('doc')}功能大纲</button><button class="btn primary" data-action="createTask">${icon('plus')}新建训练任务</button>`,body);
+    }
+    function taskTable(list) {
+      if (!list.length) return `<div class="card empty">未找到符合条件的任务</div>`;
+      return `<div class="table-wrap"><table><thead><tr><th>任务</th><th>类型</th><th>状态</th><th>进度</th><th>资源</th><th>耗时</th><th>操作</th></tr></thead><tbody>${list.map(t=>`<tr><td><div class="table-title">${t.name}</div><div class="table-sub">${t.id} · ${t.owner}</div></td><td>${t.type}</td><td>${badge(t.status)}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress"><i style="--value:${t.progress}%"></i></div><small>${t.progress}%</small></div></td><td>${t.resource}</td><td>${t.time}</td><td><div class="actions"><button class="link" data-task="${t.id}">详情</button>${t.status==='运行中'?`<button class="link" data-action="pause" data-name="${t.name}">暂停</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function training() {
+      const tabs = [{id:'basic',label:'基础配置'},{id:'network',label:'网络结构'},{id:'hyper',label:'训练参数'},{id:'evaluation',label:'评估设置'},{id:'resource',label:'资源与并行'}];
+      const panels = {
+        basic:`<div class="form-grid"><div class="form-row"><label>训练框架</label><select class="field"><option>自回归预训练框架</option><option>序列到序列预训练框架</option><option>文-图生成训练框架</option><option>有监督微调框架</option><option>强化学习框架</option></select></div><div class="form-row"><label>基础模型</label><select class="field"><option>Qwen2.5-7B / v2.5.3</option><option>DeepSeek-V3 / v3.1</option><option>GLM-4-9B / v4.0.6</option></select></div><div class="form-row"><label>训练数据集</label><select class="field"><option>科技情报指令集 v3</option><option>中英通用语料 v5</option><option>自定义数据集...</option></select></div><div class="form-row"><label>任务名称</label><input class="field" value="科技情报领域监督微调"></div><div class="form-row full"><label>任务说明</label><textarea class="field" rows="3">基于科技情报指令集对基础模型进行领域适配，提升信息抽取、摘要与关联分析能力。</textarea></div></div>`,
+        network:`<div class="form-grid"><div class="form-row"><label>架构类型</label><select class="field"><option>Transformer Decoder-only</option><option>Encoder-Decoder</option><option>Mixture of Experts</option></select></div><div class="form-row"><label>隐藏层数量</label><input class="field" type="number" value="32"></div><div class="form-row"><label>隐藏层维度</label><input class="field" type="number" value="4096"></div><div class="form-row"><label>注意力头数</label><input class="field" type="number" value="32"></div><div class="form-row"><label>最大序列长度</label><select class="field"><option>8192</option><option>32768</option><option>131072</option></select></div><div class="form-row"><label>MoE 专家数量</label><input class="field" type="number" value="8"></div></div>`,
+        hyper:`<div class="form-grid"><div class="form-row"><label>优化器</label><select class="field"><option>AdamW</option><option>Adafactor</option><option>Lion</option></select></div><div class="form-row"><label>基础学习率</label><input class="field" value="2e-5"></div><div class="form-row"><label>学习率调度</label><select class="field"><option>Cosine decay</option><option>Linear warmup</option><option>Polynomial decay</option></select></div><div class="form-row"><label>权重衰减</label><input class="field" value="0.1"></div><div class="form-row"><label>梯度裁剪</label><input class="field" value="1.0"></div><div class="form-row"><label>混合精度</label><select class="field"><option>BF16</option><option>FP16</option><option>FP32</option></select></div></div>`,
+        evaluation:`<div class="form-grid"><div class="form-row"><label>评估频率</label><select class="field"><option>每 500 steps</option><option>每个 Epoch</option><option>仅训练结束</option></select></div><div class="form-row"><label>验证数据集</label><select class="field"><option>科技情报验证集 v2</option><option>综合能力测试集</option></select></div><div class="form-row full"><label>评估指标</label><div class="chips"><label class="chip"><input type="checkbox" checked> 困惑度</label><label class="chip"><input type="checkbox" checked> 生成流畅度</label><label class="chip"><input type="checkbox" checked> 逻辑一致性</label><label class="chip"><input type="checkbox"> 安全性</label><label class="chip"><input type="checkbox"> 领域准确率</label></div></div></div>`,
+        resource:`<div class="form-grid"><div class="form-row"><label>计算资源池</label><select class="field"><option>智算集群 A · H800</option><option>智算集群 B · A800</option></select></div><div class="form-row"><label>GPU 数量</label><select class="field"><option>8 卡</option><option>16 卡</option><option>32 卡</option><option>64 卡</option></select></div><div class="form-row"><label>并行策略</label><select class="field"><option>自动推荐</option><option>数据并行 + 张量并行</option><option>流水线并行 + ZeRO</option></select></div><div class="form-row"><label>Gang Scheduling</label><select class="field"><option>启用</option><option>停用</option></select></div><div class="form-row"><label>Checkpoint 间隔</label><input class="field" value="1000 steps"></div><div class="form-row"><label>最大保留数量</label><input class="field" type="number" value="5"></div></div>`
+      };
+      const body = `<div class="split"><div class="card card-pad"><div class="tabs">${tabs.map(t=>`<button class="tab ${state.trainingTab===t.id?'active':''}" data-training-tab="${t.id}">${t.label}</button>`).join('')}</div>${panels[state.trainingTab]}</div><aside class="card card-pad"><div class="section-head"><h2>配置摘要</h2><span class="badge green right">校验通过</span></div><div class="summary-list"><div class="summary-row"><span>框架</span><b>监督微调</b></div><div class="summary-row"><span>模型</span><b>Qwen2.5-7B</b></div><div class="summary-row"><span>数据量</span><b>1,280 万 tokens</b></div><div class="summary-row"><span>并行策略</span><b>DP 4 × TP 2</b></div><div class="summary-row"><span>预计资源</span><b>8 × H800 · 18h</b></div></div><div style="margin-top:18px;padding:12px;background:#f4f8ff;border-radius:7px;color:#63748d;font-size:12px;line-height:1.6">系统将根据模型规模与集群拓扑自动校验参数，并给出并行策略优化建议。</div></aside></div>`;
+      return pageShell('创建训练任务','配置模型、数据、超参数、评估策略及分布式计算资源。',`<button class="btn" data-action="saveDraft">保存草稿</button><button class="btn primary" data-action="submitTraining">${icon('rocket')}校验并提交</button>`,body,'大规模预训练框架');
+    }
+    function modelsView() {
+      const body = `<div class="toolbar"><input class="field search-field" id="modelSearch" placeholder="搜索模型名称或架构"><select class="field" id="modelType"><option>全部模型类型</option><option>自回归</option><option>MoE</option><option>多模态</option><option>垂直模型</option></select><button class="btn">${icon('chart')}版本对比</button></div><div class="grid model-grid" id="modelGrid">${modelCards(models)}</div>`;
+      return pageShell('模型资产','统一管理基础模型、领域模型、多模态模型及其版本与交付状态。',`<button class="btn" data-action="importModel">导入模型</button><button class="btn primary" data-action="createModel">${icon('plus')}登记模型</button>`,body,'超大规模预训练模型');
+    }
+    function modelCards(list) {
+      return list.map(m=>`<article class="card model-card"><div class="model-card-head"><div class="model-logo">${m.name.slice(0,1)}</div><div><h3>${m.name}</h3><span class="table-sub">${m.version} · ${m.size}</span></div><span style="margin-left:auto">${badge(m.state)}</span></div><p>${m.desc}</p><div class="model-meta"><span class="chip">${m.type}</span><span class="chip">国产适配</span><span class="chip">API 可用</span></div><div class="model-foot"><button class="btn small" data-model="${m.name}">查看详情</button><button class="btn small primary" data-action="useModel" data-name="${m.name}">用于训练</button></div></article>`).join('');
+    }
+    function tasksView() {
+      const filters = ['全部','运行中','排队中','已完成','异常'];
+      let list = tasks;
+      if (state.taskFilter==='运行中') list=tasks.filter(x=>x.status==='运行中');
+      if (state.taskFilter==='排队中') list=tasks.filter(x=>x.status==='排队中');
+      if (state.taskFilter==='已完成') list=tasks.filter(x=>x.status==='已完成');
+      if (state.taskFilter==='异常') list=tasks.filter(x=>['失败','已暂停'].includes(x.status));
+      const body = `<div class="toolbar"><div class="tabs" style="margin:0;flex:1">${filters.map(f=>`<button class="tab ${state.taskFilter===f?'active':''}" data-task-filter="${f}">${f}</button>`).join('')}</div><input class="field" placeholder="任务 ID / 名称"></div>${taskTable(list)}`;
+      return pageShell('任务中心','集中管理训练、测评、转换与部署任务的完整生命周期。',`<button class="btn">导出任务</button><button class="btn primary" data-action="createTask">${icon('plus')}新建任务</button>`,body);
+    }
+    function evaluation() {
+      const body = `<div class="grid cols-4"><div class="card stat"><div class="stat-label">综合得分</div><div class="stat-value">86.4</div><div class="stat-meta">高于基线 5.8%</div></div><div class="card stat"><div class="stat-label">准确率</div><div class="stat-value">91.2%</div><div class="stat-meta">最优指标</div></div><div class="card stat"><div class="stat-label">平均延迟</div><div class="stat-value">182ms</div><div class="stat-meta">满足上线阈值</div></div><div class="card stat"><div class="stat-label">安全通过率</div><div class="stat-value">98.7%</div><div class="stat-meta">风险可控</div></div></div><section class="section grid cols-2"><div class="card card-pad"><div class="section-head"><h2>训练与验证损失</h2><select class="field right"><option>Qwen2.5-7B / 本次任务</option><option>历史最佳版本</option></select></div>${lineChart()}</div><div class="card card-pad"><div class="section-head"><h2>多维能力评分</h2><span class="badge blue right">行业基准对比</span></div>${[['文本理解',92,'#1767f2'],['内容生成',88,'#16a6c7'],['逻辑推理',82,'#7a65d8'],['领域知识',90,'#16a36a'],['安全对齐',86,'#d98a08']].map(m=>`<div class="metric-row"><span>${m[0]}</span><div class="metric-bar"><i style="--value:${m[1]}%;--color:${m[2]}"></i></div><b>${m[1]}</b></div>`).join('')}</div></section><section class="section"><div class="section-head"><h2>模型对比分析</h2><p>并排对比指标并高亮差异</p></div><div class="table-wrap"><table><thead><tr><th>模型版本</th><th>综合得分</th><th>准确率</th><th>F1</th><th>困惑度</th><th>推理延迟</th><th>结论</th></tr></thead><tbody><tr><td class="table-title">Qwen2.5-7B · 本次微调</td><td><b style="color:var(--green)">86.4</b></td><td>91.2%</td><td>89.7%</td><td>7.8</td><td>182ms</td><td>${badge('已完成')}</td></tr><tr><td>Qwen2.5-7B · 历史版本</td><td>81.6</td><td>86.9%</td><td>84.2%</td><td>9.6</td><td>176ms</td><td><span class="badge">基线</span></td></tr><tr><td>GLM-4-9B · 领域版</td><td>83.9</td><td>88.4%</td><td>86.8%</td><td>8.7</td><td>214ms</td><td><span class="badge">对照</span></td></tr></tbody></table></div></section>`;
+      return pageShell('模型测评报告','多任务综合评估、版本对比、可视化分析与自动化报告。',`<button class="btn" data-action="configureMetrics">配置指标</button><button class="btn primary" data-action="exportReport">导出报告</button>`,body,'模型测评框架');
+    }
+    function lineChart() {
+      return `<div class="chart"><div class="chart-grid"></div><svg viewBox="0 0 500 180" preserveAspectRatio="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1767f2" stop-opacity=".20"/><stop offset="1" stop-color="#1767f2" stop-opacity="0"/></linearGradient></defs><path d="M0 25 C45 43,70 62,105 68 S180 95,215 106 S295 122,330 132 S415 142,500 148 L500 180 L0 180Z" fill="url(#area)"/><path d="M0 25 C45 43,70 62,105 68 S180 95,215 106 S295 122,330 132 S415 142,500 148" fill="none" stroke="#1767f2" stroke-width="3"/><path d="M0 48 C50 55,70 79,115 84 S180 104,225 112 S300 130,350 136 S430 148,500 153" fill="none" stroke="#16a6c7" stroke-width="2" stroke-dasharray="6 4"/></svg></div><div style="display:flex;gap:16px;justify-content:center;color:var(--muted);font-size:11px"><span>● <i style="color:#1767f2">训练损失</i></span><span>● <i style="color:#16a6c7">验证损失</i></span></div>`;
+    }
+    function deployment() {
+      const services = [
+        ['Qwen-Science-Chat','在线','v2.5.3','4 实例','1,286 QPS','99.99%'],
+        ['EduMind-Reasoner','灰度','v1.2.0','2 实例','436 QPS','99.96%'],
+        ['VisionFusion-API','在线','v1.0.3','3 实例','218 QPS','99.98%'],
+        ['GLM-General-Service','在线','v4.0.6','6 实例','2,104 QPS','99.99%']
+      ];
+      const body = `<div class="grid cols-4"><div class="card stat"><div class="stat-label">在线服务</div><div class="stat-value">42</div><div class="stat-meta">全部网关健康</div></div><div class="card stat"><div class="stat-label">今日请求</div><div class="stat-value">8.6M</div><div class="stat-meta">↑ 12.4%</div></div><div class="card stat"><div class="stat-label">P95 延迟</div><div class="stat-value">238ms</div><div class="stat-meta">低于 SLA 阈值</div></div><div class="card stat"><div class="stat-label">告警事件</div><div class="stat-value">3</div><div class="stat-meta warn">1 项待处理</div></div></div><section class="section"><div class="section-head"><h2>推理服务</h2><p>网关、编排、弹性伸缩与运行监控</p></div><div class="table-wrap"><table><thead><tr><th>服务名称</th><th>状态</th><th>模型版本</th><th>服务实例</th><th>吞吐</th><th>SLA</th><th>操作</th></tr></thead><tbody>${services.map(s=>`<tr><td class="table-title">${s[0]}</td><td>${badge(s[1])}</td><td>${s[2]}</td><td>${s[3]}</td><td>${s[4]}</td><td>${s[5]}</td><td><button class="link" data-action="serviceDetail" data-name="${s[0]}">详情</button><button class="link">监控</button></td></tr>`).join('')}</tbody></table></div></section><section class="section grid cols-3"><div class="card module-card"><div class="module-top"><div class="module-icon">${icon('model')}</div><h3>模型压缩</h3></div><p>量化、剪枝与蒸馏配置，生成适配目标推理环境的轻量化模型。</p><span class="badge green" style="width:max-content">12 个任务已完成</span></div><div class="card module-card"><div class="module-top"><div class="module-icon">${icon('task')}</div><h3>格式转换</h3></div><p>支持 PyTorch、ONNX、TensorRT 等模型格式互转与兼容性校验。</p><span class="badge blue" style="width:max-content">8 种格式</span></div><div class="card module-card"><div class="module-top"><div class="module-icon">${icon('rocket')}</div><h3>服务编排</h3></div><p>配置路由、负载均衡、弹性伸缩、版本灰度及失败回滚策略。</p><span class="badge amber" style="width:max-content">3 项待发布</span></div></section>`;
+      return pageShell('推理与部署','打通模型压缩、格式转换、质量测评、部署发布和服务运营。',`<button class="btn">API 文档</button><button class="btn primary" data-action="createService">${icon('plus')}发布服务</button>`,body,'推理引擎');
+    }
+    function algorithms() {
+      const tabs = [{id:'prompt',label:'提示学习'},{id:'reverse',label:'反向提示'},{id:'fewshot',label:'小样本学习'},{id:'graph',label:'图计算算法'}];
+      const prompt = `<div class="split"><div class="card card-pad"><div class="form-row"><label>提示模板编辑器</label><textarea class="field" id="promptText" rows="9">你是一名科技情报分析专家。请根据以下材料提取关键技术、研究机构与潜在趋势，并以 JSON 格式输出。\n\n材料：{{input}}</textarea></div><div style="display:flex;align-items:center;gap:8px;margin-top:12px"><span class="badge blue">变量 {{input}}</span><span class="badge">版本 v3</span><button class="btn small primary" style="margin-left:auto" data-action="optimizePrompt">智能优化</button></div></div><div class="card card-pad"><div class="section-head"><h2>模板配置</h2></div><div class="summary-list"><div class="summary-row"><span>目标模型</span><b>Qwen2.5-7B</b></div><div class="summary-row"><span>任务类型</span><b>信息抽取</b></div><div class="summary-row"><span>优化策略</span><b>指令重构 + 示例增强</b></div><div class="summary-row"><span>当前评分</span><b style="color:var(--green)">86.7</b></div></div><button class="btn" style="width:100%;margin-top:17px" data-action="testPrompt">运行测试</button></div></div>`;
+      const reverse = `<div class="split"><div class="card card-pad"><div class="form-row"><label>模型生成文本 <span id="charCount" style="float:right;color:var(--muted)">0 字</span></label><textarea class="field" id="reverseText" rows="10" placeholder="粘贴待分析的模型生成文本，系统将反向推断可能的提示结构与指令意图。"></textarea></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn" data-action="loadExample">加载示例</button><button class="btn ghost" data-action="clearReverse">清空</button><button class="btn primary" style="margin-left:auto" data-action="analyzeReverse">开始分析</button></div></div><div class="card card-pad" id="reverseResult"><div class="empty">分析结果将在这里展示<br><small>包含提示词重构、关键指令、意图分类和置信度</small></div></div></div>`;
+      const fewshot = `<div class="grid cols-3"><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('algo')}</div><h3>Prototypical Networks</h3></div><p>度量学习 · 适用于少样本分类与快速领域适配。</p><div class="chips"><span class="chip">5-way</span><span class="chip">5-shot</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon" style="color:var(--green);background:#e9faf2">${icon('algo')}</div><h3>Matching Networks</h3></div><p>注意力匹配 · 适用于动态类别与小规模标注数据。</p><div class="chips"><span class="chip">Metric-based</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon" style="color:var(--amber);background:#fff5df">${icon('algo')}</div><h3>Relation Network</h3></div><p>关系学习 · 支持文本分类、图文匹配等下游任务。</p><div class="chips"><span class="chip">已配置</span><span class="chip">92.4% Acc</span></div></article></div><section class="section card card-pad"><div class="section-head"><h2>标准化评估基准</h2><button class="btn small primary right">新建评估</button></div>${taskTable(tasks.filter(t=>t.type==='自动测评'))}</section>`;
+      const graph = `<div class="grid cols-3"><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('model')}</div><h3>图预训练框架</h3></div><p>配置图数据集、编码器、预训练目标和分布式训练资源。</p><div class="chips"><span class="chip">GraphMAE</span><span class="chip">GraphCL</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('algo')}</div><h3>图学习算法库</h3></div><p>按任务类型检索并配置节点分类、链路预测与图分类算法。</p><div class="chips"><span class="chip">GCN</span><span class="chip">GAT</span><span class="chip">GraphSAGE</span></div></article><article class="card module-card"><div class="module-top"><div class="module-icon">${icon('chart')}</div><h3>实验结果分析</h3></div><p>对比性能指标、训练曲线、嵌入空间与错误样本。</p><div class="chips"><span class="chip">可视化</span><span class="chip">报告导出</span></div></article></div>`;
+      const panels = {prompt, reverse, fewshot, graph};
+      const body = `<div class="tabs">${tabs.map(t=>`<button class="tab ${state.algoTab===t.id?'active':''}" data-algo-tab="${t.id}">${t.label}</button>`).join('')}</div>${panels[state.algoTab]}`;
+      return pageShell('大模型算法服务','图计算、提示学习、反向提示与小样本学习算法的一站式实验工作台。',`<button class="btn">算法文档</button><button class="btn primary" data-action="saveAlgo">${icon('plus')}保存实验</button>`,body,'大模型算法服务');
+    }
+    function resources() {
+      const body = `<div class="grid cols-4"><div class="card stat"><div class="stat-label">GPU 总量</div><div class="stat-value">384</div><div class="stat-meta">可用 86 卡</div></div><div class="card stat"><div class="stat-label">平均利用率</div><div class="stat-value">78.6%</div><div class="stat-meta">处于健康区间</div></div><div class="card stat"><div class="stat-label">高速互联</div><div class="stat-value">3.2Tb/s</div><div class="stat-meta">RDMA 正常</div></div><div class="card stat"><div class="stat-label">排队任务</div><div class="stat-value">12</div><div class="stat-meta warn">最长等待 28m</div></div></div><section class="section grid cols-2"><div class="card"><div class="card-pad section-head"><h2>集群拓扑</h2><span class="badge green right">全部节点在线</span></div><div class="topology"><div class="topology-grid"></div><div class="topology-map"><div class="node primary-node"><b>训练控制面</b><span>健康</span></div><div class="connector" style="left:47%;top:60px;width:44%;transform:rotate(136deg)"></div><div class="connector" style="left:47%;top:60px;width:31%;transform:rotate(116deg)"></div><div class="connector" style="left:47%;top:60px;width:31%;transform:rotate(64deg)"></div><div class="connector" style="left:47%;top:60px;width:44%;transform:rotate(43deg)"></div><div class="node n1"><b>H800 · Node 01</b><span>8 / 8 GPU</span></div><div class="node n2"><b>H800 · Node 02</b><span>6 / 8 GPU</span></div><div class="node n3"><b>H800 · Node 03</b><span>7 / 8 GPU</span></div><div class="node n4"><b>H800 · Node 04</b><span>8 / 8 GPU</span></div></div></div></div><div class="card card-pad"><div class="section-head"><h2>资源实时监控</h2><select class="field right"><option>智算集群 A</option><option>智算集群 B</option></select></div>${lineChart()}<div class="grid cols-2" style="margin-top:12px"><div><span class="table-sub">GPU 显存使用</span><div class="metric-row" style="grid-template-columns:1fr 42px"><div class="metric-bar"><i style="--value:82%;--color:var(--cyan)"></i></div><b>82%</b></div></div><div><span class="table-sub">网络带宽使用</span><div class="metric-row" style="grid-template-columns:1fr 42px"><div class="metric-bar"><i style="--value:64%;--color:var(--green)"></i></div><b>64%</b></div></div></div></div></section><section class="section">${taskTable(tasks.filter(t=>t.status==='运行中'))}</section>`;
+      return pageShell('资源与拓扑','拓扑感知的分布式训练、GPU 调度与集群资源实时监控。',`<button class="btn" data-action="alertConfig">告警配置</button><button class="btn primary" data-action="resourceStrategy">并行策略建议</button>`,body,'分布式训练');
+    }
+    function coverage() {
+      const groups = [
+        {title:'1. 大规模预训练框架', count:'8 个模块', items:['自回归预训练框架','序列到序列预训练框架','文-图生成训练框架','拓扑与资源感知的分布式训练','有监督微调框架','强化学习框架','模型测评框架','推理引擎']},
+        {title:'2. 超大规模预训练模型', count:'5 类能力', items:['中英语言预训练模型','面向认知的预训练模型','多模态预训练模型','科技情报训练模型服务','教育大模型预训练能力服务','模型服务与集成','领域大模型测评体系']},
+        {title:'3. 大模型算法服务', count:'4 类算法', items:['图计算算法工具集','提示学习算法','反向提示算法','小样本学习算法','评估基准构建','下游任务快速适配','技术文档与开发支持']},
+        {title:'4. 共性平台能力', count:'全生命周期', items:['模型与版本管理','数据集选择与上传','训练参数与模板','任务队列与生命周期','实时指标与训练日志','报告导出与可视化','API 文档与示例代码','异常告警与权限控制','模型压缩与格式转换','服务网关与运营监控']}
+      ];
+      const body = `<div class="card card-pad" style="margin-bottom:16px;background:#f7faff"><div class="section-head"><h2>原型覆盖说明</h2><span class="badge blue right">依据 MaaS 标书 1.3.2.5 章节</span></div><p style="margin:0;color:var(--muted);line-height:1.7">当前为可持续补充的页面原型大纲：完整保留标书能力层级，并选择训练配置、任务管理、模型测评、推理服务、算法实验和资源拓扑作为重点交互页面。后续可按模块逐步深化字段、流程和业务规则。</p></div><div class="coverage">${groups.map((g,i)=>`<div class="coverage-group ${i===0?'open':''}"><div class="coverage-head"><div class="module-icon" style="width:28px;height:28px">${icon(['train','model','algo','doc'][i],16)}</div><strong>${g.title}</strong><span class="badge">${g.count}</span><span style="color:var(--muted)">⌄</span></div><div class="coverage-body">${g.items.map(x=>`<div class="coverage-item"><span class="check">✓</span>${x}</div>`).join('')}</div></div>`).join('')}</div><section class="section"><div class="section-head"><h2>建议深化顺序</h2><p>便于后续按优先级补充细节</p></div><div class="card workflow">${['模型训练配置','任务监控中心','测评报告','推理部署','算法实验','模型资产运营'].map((x,i)=>`<div class="flow-step ${i<2?'done':''}"><div class="flow-dot">${i+1}</div><b>${x}</b><span>${['核心生产入口','全局任务枢纽','上线质量门禁','能力交付出口','创新算法工具','版本与运营闭环'][i]}</span></div>`).join('')}</div></section>`;
+      return pageShell('标书功能原型大纲','对照标书功能架构，展示当前原型覆盖范围与后续深化入口。',`<button class="btn" data-action="exportOutline">导出大纲</button><button class="btn primary" data-page="training">开始查看原型</button>`,body,'标书需求覆盖');
+    }
+    function render() {
+      renderNav();
+      const views = {overview, training, models:modelsView, tasks:tasksView, evaluation, deployment, algorithms, resources, coverage};
+      $('#page').innerHTML = views[state.page]();
+      window.scrollTo({top:0, behavior:'smooth'});
+      bindDynamic();
+    }
+    function openModal(title, body, confirm='确认', onConfirm=null) {
+      const mask = $('#modalMask');
+      mask.innerHTML = `<div class="modal"><div class="modal-head"><h3>${title}</h3><button class="icon-btn" data-close-modal>${icon('x')}</button></div><div class="modal-body">${body}</div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" id="modalConfirm">${confirm}</button></div></div>`;
+      mask.classList.add('show'); mask.setAttribute('aria-hidden','false');
+      $$('[data-close-modal]',mask).forEach(x=>x.onclick=closeModal);
+      $('#modalConfirm').onclick=()=>{ if(onConfirm) onConfirm(); closeModal(); };
+    }
+    function closeModal(){ $('#modalMask').classList.remove('show'); $('#modalMask').setAttribute('aria-hidden','true'); }
+    function openDrawer(title, body) {
+      const mask=$('#drawerMask');
+      mask.innerHTML=`<aside class="drawer"><div class="drawer-head"><h3>${title}</h3><button class="icon-btn" data-close-drawer>${icon('x')}</button></div><div class="drawer-body">${body}</div></aside>`;
+      mask.classList.add('show'); mask.setAttribute('aria-hidden','false');
+      $('[data-close-drawer]',mask).onclick=closeDrawer;
+    }
+    function closeDrawer(){ $('#drawerMask').classList.remove('show'); $('#drawerMask').setAttribute('aria-hidden','true'); }
+    function commandPalette() {
+      const body = `<div class="command"><input id="commandInput" autofocus placeholder="输入页面或功能名称…"><div class="command-list" id="commandList">${navItems.map(n=>`<div class="command-item" data-command-page="${n.id}">${icon(n.icon)}<span>${n.label}</span><small>跳转</small></div>`).join('')}</div></div>`;
+      $('#modalMask').innerHTML=body; $('#modalMask').classList.add('show');
+      const inp=$('#commandInput'); setTimeout(()=>inp.focus(),40);
+      inp.oninput=()=>{ const q=inp.value.toLowerCase(); $$('[data-command-page]').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?'flex':'none'); };
+      $$('[data-command-page]').forEach(x=>x.onclick=()=>{state.page=x.dataset.commandPage;closeModal();render();});
+    }
+    function taskDetail(id) {
+      const t=tasks.find(x=>x.id===id);
+      openDrawer(t.name, `<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">${badge(t.status)}<span class="table-sub">${t.id}</span></div><div class="summary-list"><div class="summary-row"><span>任务类型</span><b>${t.type}</b></div><div class="summary-row"><span>负责人</span><b>${t.owner}</b></div><div class="summary-row"><span>计算资源</span><b>${t.resource}</b></div><div class="summary-row"><span>当前进度</span><b>${t.progress}%</b></div><div class="summary-row"><span>运行时长</span><b>${t.time}</b></div></div><div class="section-head" style="margin-top:22px"><h2>执行日志</h2><button class="btn small right">导出日志</button></div><div class="log">[11:32:08] Dataset loaded: 12,802,416 tokens\n[11:32:11] Model initialized with BF16 precision\n[11:32:15] Distributed strategy: DP=4, TP=2\n[11:47:32] Step 8,500 / 12,500 · loss 1.284\n[11:47:33] GPU utilization 91% · memory 76%\n[11:47:34] Checkpoint validation passed</div>`);
+    }
+    function modelDetail(name) {
+      const m=models.find(x=>x.name===name);
+      openDrawer(`${m.name} · ${m.version}`, `<div style="display:flex;gap:10px;margin-bottom:18px"><div class="model-logo">${m.name[0]}</div><div><b style="color:var(--ink)">${m.type} · ${m.size}</b><div style="margin-top:5px">${badge(m.state)}</div></div></div><p style="line-height:1.7;color:var(--muted)">${m.desc}</p><div class="section-head" style="margin-top:22px"><h2>模型元信息</h2></div><div class="summary-list"><div class="summary-row"><span>模型架构</span><b>Transformer / ${m.type}</b></div><div class="summary-row"><span>上下文长度</span><b>32,768 tokens</b></div><div class="summary-row"><span>权重格式</span><b>SafeTensors</b></div><div class="summary-row"><span>适配状态</span><b>已优化支持</b></div><div class="summary-row"><span>最近更新</span><b>2026-07-28</b></div></div><button class="btn primary" style="width:100%;margin-top:20px" data-page="training" onclick="closeDrawer();state.page='training';render()">用于新训练任务</button>`);
+    }
+    function bindDynamic() {
+      $$('[data-page]').forEach(el=>el.onclick=()=>{state.page=el.dataset.page;$('#app').classList.remove('mobile-open');render();});
+      $$('[data-training-tab]').forEach(el=>el.onclick=()=>{state.trainingTab=el.dataset.trainingTab;render();});
+      $$('[data-algo-tab]').forEach(el=>el.onclick=()=>{state.algoTab=el.dataset.algoTab;render();});
+      $$('[data-task-filter]').forEach(el=>el.onclick=()=>{state.taskFilter=el.dataset.taskFilter;render();});
+      $$('[data-task]').forEach(el=>el.onclick=()=>taskDetail(el.dataset.task));
+      $$('[data-model]').forEach(el=>el.onclick=()=>modelDetail(el.dataset.model));
+      $$('.coverage-head').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
+      const ms=$('#modelSearch');
+      if(ms) ms.oninput=()=>{$('#modelGrid').innerHTML=modelCards(models.filter(m=>(m.name+m.type+m.desc).toLowerCase().includes(ms.value.toLowerCase())));bindDynamic();};
+      const mt=$('#modelType');
+      if(mt) mt.onchange=()=>{$('#modelGrid').innerHTML=modelCards(mt.value==='全部模型类型'?models:models.filter(m=>m.type===mt.value));bindDynamic();};
+      const rt=$('#reverseText');
+      if(rt) rt.oninput=()=>$('#charCount').textContent=`${rt.value.length} 字`;
+      $$('[data-action]').forEach(el=>el.onclick=()=>handleAction(el.dataset.action,el));
+    }
+    function handleAction(action, el) {
+      const simple = {
+        notify:'当前无未读异常告警',
+        saveDraft:'训练配置草稿已保存',
+        exportReport:'测评报告已生成，正在准备下载',
+        saveAlgo:'算法实验已保存至个人配置库',
+        exportOutline:'原型功能大纲已生成',
+        alertConfig:'告警配置已载入',
+        resourceStrategy:'已生成拓扑感知的并行策略建议',
+        optimizePrompt:'提示模板已优化，综合评分提升至 91.3',
+        testPrompt:'测试任务已提交，预计 8 秒返回结果',
+        pause:`已向任务“${el.dataset.name||''}”发送暂停指令`,
+        useModel:`已选择 ${el.dataset.name||'该模型'}，正在打开训练配置`
+      };
+      if(simple[action]) { toast(simple[action]); if(action==='useModel'){setTimeout(()=>{state.page='training';render()},450)} return; }
+      if(action==='createTask' || action==='createModel' || action==='importModel') {
+        openModal(action==='importModel'?'导入模型':action==='createModel'?'登记模型':'新建任务', `<div class="form-grid"><div class="form-row full"><label>名称</label><input class="field" placeholder="请输入名称"></div><div class="form-row"><label>类型</label><select class="field"><option>模型训练</option><option>模型测评</option><option>部署发布</option></select></div><div class="form-row"><label>所属项目</label><select class="field"><option>科技情报大模型</option><option>教育大模型</option></select></div><div class="form-row full"><label>说明</label><textarea class="field" rows="3" placeholder="补充任务目标与备注"></textarea></div></div>`, '创建', ()=>toast('已创建草稿，可继续补充配置'));
+      } else if(action==='submitTraining') {
+        openModal('确认提交训练任务', `<div style="padding:10px;background:#f5f9ff;border-radius:7px;line-height:1.8"><b style="color:var(--ink)">科技情报领域监督微调</b><br>基础模型：Qwen2.5-7B<br>计算资源：8 × H800<br>预计时长：18 小时<br>并行策略：DP 4 × TP 2</div><p style="color:var(--muted)">参数合法性与资源配额校验已通过，提交后将进入训练队列。</p>`, '确认提交', ()=>{toast('训练任务已成功提交');setTimeout(()=>{state.page='tasks';render()},500)});
+      } else if(action==='createService') {
+        openModal('发布推理服务', `<div class="form-grid"><div class="form-row full"><label>服务名称</label><input class="field" value="Qwen-Science-Chat"></div><div class="form-row"><label>模型版本</label><select class="field"><option>Qwen2.5-7B / v2.5.3</option></select></div><div class="form-row"><label>部署策略</label><select class="field"><option>灰度发布</option><option>全量发布</option></select></div><div class="form-row"><label>初始实例数</label><input class="field" type="number" value="2"></div><div class="form-row"><label>推理精度</label><select class="field"><option>BF16</option><option>INT8</option></select></div></div>`, '确认发布', ()=>toast('推理服务发布任务已创建'));
+      } else if(action==='loadExample') {
+        const text='本研究提出了一种面向多源科技文献的知识图谱构建方法，通过跨模态特征对齐与图神经网络实现实体消歧，在公开数据集上取得了 92.4% 的 F1 分数。';
+        $('#reverseText').value=text; $('#charCount').textContent=`${text.length} 字`;
+      } else if(action==='clearReverse') {
+        $('#reverseText').value=''; $('#charCount').textContent='0 字';
+      } else if(action==='analyzeReverse') {
+        if(!$('#reverseText').value.trim()){toast('请先输入或加载待分析文本','warn');return;}
+        const result=$('#reverseResult'); result.innerHTML='<div class="empty">正在使用 Qwen 系列专用适配策略分析…</div>';
+        setTimeout(()=>result.innerHTML=`<div class="section-head"><h2>推断结果</h2><span class="badge green right">置信度 87%</span></div><div class="form-row"><label>重构提示词</label><textarea class="field" rows="5">请以学术摘要的风格，总结以下研究工作的核心方法、技术创新及实验结果，突出关键指标。</textarea></div><div style="margin-top:14px"><label class="table-sub">关键指令</label><div class="chips" style="margin-top:7px"><span class="chip">学术摘要</span><span class="chip">核心方法</span><span class="chip">实验指标</span></div></div><div style="margin-top:14px"><label class="table-sub">意图分类</label><div class="chips" style="margin-top:7px"><span class="badge blue">摘要生成</span><span class="badge">信息抽取</span></div></div>`,700);
+      } else if(action==='serviceDetail') {
+        openDrawer(el.dataset.name, `<div style="margin-bottom:18px">${badge('在线')}</div><div class="summary-list"><div class="summary-row"><span>服务版本</span><b>v2.5.3</b></div><div class="summary-row"><span>当前实例</span><b>4</b></div><div class="summary-row"><span>自动伸缩</span><b>2–12 实例</b></div><div class="summary-row"><span>P95 延迟</span><b>218 ms</b></div><div class="summary-row"><span>今日请求</span><b>2.84M</b></div></div>${lineChart()}`);
+      } else {
+        toast('该功能入口已保留，可在下一版补充详细流程');
+      }
+    }
+    $('#sidebarToggle').onclick=()=>$('#app').classList.toggle('collapsed');
+    $('#mobileNav').onclick=()=>$('#app').classList.toggle('mobile-open');
+    $('#commandTrigger').onclick=commandPalette;
+    $('#modalMask').addEventListener('click',e=>{if(e.target===$('#modalMask'))closeModal()});
+    $('#drawerMask').addEventListener('click',e=>{if(e.target===$('#drawerMask'))closeDrawer()});
+    document.addEventListener('keydown',e=>{
+      if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();commandPalette();}
+      if(e.key==='Escape'){closeModal();closeDrawer();}
+    });
+    render();
+  </script>
+</body>
+</html>
