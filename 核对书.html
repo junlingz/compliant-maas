@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大模型算法服务 — 需规核对书</title>
+<style>
+:root{
+  --primary:#1767f2;--cyan:#16a6c7;--green:#16a36a;--amber:#d98a08;--red:#db3b45;
+  --ink:#1a202c;--text:#2d3748;--muted:#718096;--line:#e4eaf3;--bg:#f7f9fc;
+  --card:#fff;--radius:10px;--tint-blue:#e9f3ff;--tint-green:#e9faf2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:32px 24px}
+header{text-align:center;padding:40px 0 32px;border-bottom:2px solid var(--primary)}
+header h1{font-size:28px;color:var(--ink);margin-bottom:8px}
+header p{color:var(--muted);font-size:14px}
+header .meta{margin-top:12px;font-size:12px;color:var(--muted)}
+.module-nav{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0;justify-content:center}
+.module-nav a{display:inline-block;padding:8px 18px;background:var(--card);border:1px solid var(--line);border-radius:20px;text-decoration:none;color:var(--text);font-size:13px;transition:all .2s}
+.module-nav a:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.module{margin-bottom:40px}
+.module-head{background:linear-gradient(135deg,var(--primary),#4a8dff);color:#fff;padding:18px 24px;border-radius:var(--radius) var(--radius) 0 0;font-size:18px;font-weight:700}
+.module-head .module-num{display:inline-block;width:28px;height:28px;background:rgba(255,255,255,.25);border-radius:50%;text-align:center;line-height:28px;font-size:14px;margin-right:8px}
+.submodule{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0}
+.submodule-head{background:#f0f4fa;padding:14px 24px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+.submodule-head .tag{font-size:11px;background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;font-weight:400}
+.req-table{width:100%;border-collapse:collapse}
+.req-table th{background:#fafbfc;padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.req-table td{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+.req-table tr:last-child td{border-bottom:0}
+.req-table tr:hover td{background:#fafbfc}
+.req-id{font-weight:700;color:var(--primary);white-space:nowrap}
+.req-name{font-weight:600;color:var(--ink);min-width:120px}
+.req-detail{color:var(--text);max-width:360px}
+.req-detail ul{margin:4px 0 0 16px;padding:0}
+.req-detail li{margin-bottom:2px}
+.req-path{color:var(--cyan);font-family:Menlo,Monaco,monospace;font-size:12px;background:#f0f7ff;padding:8px 12px;border-radius:6px;border-left:3px solid var(--cyan);min-width:280px}
+.req-path .step{display:block;margin-bottom:2px}
+.req-path .arrow{color:var(--muted);margin:0 4px}
+.req-path .final{color:var(--green);font-weight:600}
+.status{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.status.done{background:var(--tint-green);color:var(--green)}
+.status.partial{background:#fff5df;color:var(--amber)}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:32px}
+.summary h2{font-size:16px;color:var(--ink);margin-bottom:14px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.summary-stat{text-align:center;padding:16px;background:var(--bg);border-radius:8px}
+.summary-stat .num{font-size:28px;font-weight:700;color:var(--primary)}
+.summary-stat .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+@media(max-width:768px){
+  .req-table{display:block;overflow-x:auto}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>大模型算法服务 — 需规核对书</h1>
+  <p>需求规格说明书 &times; 原型页面 功能点映射</p>
+  <div class="meta">核对范围：2.3 大模型算法服务（图计算算法工具集 / 提示学习算法 / 反向提示算法 / 小样本学习算法）&nbsp;|&nbsp;核对日期：2026-07-30（第二轮查漏补缺更新）</div>
+</header>
+
+<div class="module-nav">
+  <a href="#m1">2.3.1 图计算算法工具集</a>
+  <a href="#m2">2.3.2 提示学习算法</a>
+  <a href="#m3">2.3.3 反向提示算法</a>
+  <a href="#m4">2.3.4 小样本学习算法</a>
+</div>
+
+<div class="summary">
+  <h2>核对概览</h2>
+  <div class="summary-grid">
+    <div class="summary-stat"><div class="num">4</div><div class="lbl">一级模块</div></div>
+    <div class="summary-stat"><div class="num">14</div><div class="lbl">二级子模块</div></div>
+    <div class="summary-stat"><div class="num">37</div><div class="lbl">需规功能点</div></div>
+    <div class="summary-stat"><div class="num">100%</div><div class="lbl">覆盖率</div></div>
+  </div>
+</div>
+
+<!-- ============ 2.3.1 图计算算法工具集 ============ -->
+<div class="module" id="m1">
+  <div class="module-head"><span class="module-num">1</span>2.3.1 图计算算法工具集</div>
+
+  <!-- 预训练框架构建 -->
+  <div class="submodule">
+    <div class="submodule-head">预训练框架构建 <span class="tag">4 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">预训练任务配置</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）数据源接入：选择已上传图数据集（CSV边表/节点特征文件），<b>或通过API接口对接外部数据源</b>。自动解析展示节点数、边数、特征维度摘要</li>
+              <li>（2）任务类型选择：下拉选择"边对比预测"/"子图对比预测"，展示原理简介和适用场景</li>
+              <li>（3）采样策略配置：配置负采样策略（随机/硬负样本挖掘）和批次采样大小</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">首页 → 左侧导航「大模型算法服务」</span>
+            <span class="step">→ 顶部Tab「图计算算法工具集」</span>
+            <span class="step">→ 子Tab「预训练框架构建」</span>
+            <span class="step">→ <span class="final">「预训练任务配置」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">数据源下拉选择(含"通过API对接外部数据源"选项→展开API地址/Key/认证方式/测试连接) + 任务类型下拉(联动提示) + 图结构摘要自动展示 + 负采样策略/批次大小配置</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">模型参数配置</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）编码器选择：从内置列表(GCN/GAT/GraphSAGE)选择，可查看结构示意图和参数说明</li>
+              <li>（2）网络结构定义：设置网络层数、隐藏单元维度、激活函数(ReLU/LeakyReLU)、dropout比例</li>
+              <li>（3）损失函数与优化器设置：选择损失函数(InfoNCELoss)和优化器(Adam/SGD)，配置学习率、权重衰减</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上路径 → 「预训练框架构建」</span>
+            <span class="step">→ 右侧 <span class="final">「模型参数配置」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">编码器下拉 + 网络层数/隐藏维度/激活函数/Dropout + 损失函数/优化器/学习率/权重衰减表单</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">训练任务监控与可视化</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）训练启动与控制：点击"开始训练"，训练过程中可"暂停"/"停止"</li>
+              <li>（2）实时指标展示：折线图实时展示损失函数值、学习率变化曲线</li>
+              <li>（3）资源使用监控：动态显示GPU/CPU使用率、内存消耗</li>
+              <li>（4）训练日志查看：展开日志面板，实时查看epoch耗时、数据加载信息</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上路径 → 「预训练框架构建」</span>
+            <span class="step">→ <span class="final">「训练任务监控与可视化」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">开始训练/暂停/停止按钮 + 损失函数折线图 + GPU/CPU/内存/学习率进度条 + 训练日志面板(含epoch信息)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">4</td>
+          <td class="req-name">模型管理与导出</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）模型列表展示：自动保存训练完成的模型，展示名称、创建时间、任务配置、性能指标</li>
+              <li>（2）模型详情查看：点击模型查看配置参数、训练曲线和评估报告</li>
+              <li>（3）模型导出：选择模型导出为.pth或ONNX格式下载</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上路径 → 「预训练框架构建」</span>
+            <span class="step">→ <span class="final">「模型管理与导出」表格</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">模型列表(名称/任务/时间/指标) → 点击「详情」打开侧边抽屉 → 点击「导出」打包下载</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 图学习算法库 -->
+  <div class="submodule">
+    <div class="submodule-head">图学习算法库 <span class="tag">4 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">算法浏览与选择</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）分类导航树：左侧算法分类树，按GNN/无监督图表示学习/有监督图表示学习筛选</li>
+              <li>（2）算法卡片展示：卡片形式展示GCN/GAT/FastGCN/DGK/Graph2vec/InfoGraph/Patchy-SAN/DGCNN/SortPool/DiffPool/GIN等算法，含名称、核心思想、适用任务</li>
+              <li>（3）算法详情查看：点击弹出详情窗口，展示原理、论文链接、参数说明、性能基准</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「图计算算法工具集」</span>
+            <span class="step">→ 子Tab「图学习算法库」</span>
+            <span class="step">→ 左侧 <span class="final">算法分类导航树</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">展开GNN/无监督/有监督分类 → 点击算法名 → 右侧显示详情面板(原理/论文/参数/性能基准)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">算法模型配置与执行</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）一键调用：点击"立即使用"，跳转任务配置页面，自动加载默认参数模板</li>
+              <li>（2）参数配置表单：动态生成参数配置表单(数据集路径/训练轮次/学习率等)，提供输入范围建议</li>
+              <li>（3）任务提交与排队：提交后加入执行队列，反馈预估等待时间</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">算法详情面板 → 点击「立即使用」</span>
+            <span class="step">→ <span class="final">参数配置表单自动加载</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">数据集路径/训练轮次/学习率/隐藏维度/Dropout/权重衰减 + 参数范围建议 + 「提交执行」反馈排队信息</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">实验结果分析与可视化</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）性能指标仪表盘：准确率/精确率/召回率/F1/AUC，与基线模型对比</li>
+              <li>（2）可视化结果展示：节点分类展示嵌入分布；链接预测展示高亮边</li>
+              <li>（3）结果文件下载：CSV预测结果、PDF指标报告、Numpy嵌入向量</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「图学习算法库」</span>
+            <span class="step">→ 选中算法后底部出现</span>
+            <span class="step">→ <span class="final">「实验结果分析与可视化」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">性能指标仪表盘(5项指标+基线对比) + 节点嵌入t-SNE可视化(SVG) + CSV/PDF/嵌入向量下载按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">4</td>
+          <td class="req-name">实验任务管理</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）任务列表视图：表格列出所有实验任务(名称/算法/状态/提交时间/运行时长)</li>
+              <li>（2）任务操作：查看详情、跳转结果、删除、基于已有配置创建新实验(参数复用)</li>
+              <li>（3）任务日志追溯：失败任务可查看日志获取错误信息</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「图学习算法库」</span>
+            <span class="step">→ <span class="final">「实验任务管理」表格</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">任务列表(ID/名称/算法/状态/准确率/耗时/日期) → 详情/结果/日志(仅失败)/复用按钮 + 「新建实验」按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 技术文档与开发支持 -->
+  <div class="submodule">
+    <div class="submodule-head">技术文档与开发支持 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">在线技术文档中心</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）结构化导航：左侧导航栏+右侧内容区，按快速开始/用户指南/算法原理/常见问题浏览</li>
+              <li>（2）全文搜索功能：搜索框输入关键词，高亮显示匹配结果</li>
+              <li>（3）内容展示与交互：Markdown渲染，代码块语法高亮+一键复制，图片可放大</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「图计算算法工具集」</span>
+            <span class="step">→ 子Tab「技术文档与开发支持」</span>
+            <span class="step">→ <span class="final">在线技术文档中心</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">左侧树状导航(快速开始/用户指南/算法原理/常见问题) + 顶部搜索框 + 右侧Markdown内容区(代码块+复制按钮)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">API接口参考手册</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）接口目录：按功能模块(预训练框架/算法库)组织API</li>
+              <li>（2）接口详情页：请求URL/方法/参数(名称/类型/必填/默认值/示例)/返回JSON结构</li>
+              <li>（3）在线调试工具：页面内嵌调试工具，填写参数发送请求，实时查看返回结果</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 「技术文档与开发支持」</span>
+            <span class="step">→ <span class="final">「API接口参考手册」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">接口模块下拉 + 接口选择 + 参数详情列表(URL/Content-Type/字段说明/返回示例) + 「在线调试」发送请求按钮+cURL代码</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">开发示例与代码库</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）示例场景列表：典型应用场景(基于GCN的论文分类/Graph2Vec图相似度计算)</li>
+              <li>（2）可运行代码展示：完整可运行代码(Python/Jupyter)，含详细注释</li>
+              <li>（3）代码下载与运行：一键下载代码包，附带README.md环境配置说明</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 「技术文档与开发支持」</span>
+            <span class="step">→ <span class="final">「开发示例与代码库」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">示例场景卡片(GCN论文分类/Graph2Vec相似度) + 代码块(语法高亮+复制) + 「下载代码包」+「查看README」按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ 2.3.2 提示学习算法 ============ -->
+<div class="module" id="m2">
+  <div class="module-head"><span class="module-num">2</span>2.3.2 提示学习算法</div>
+
+  <!-- 提示模板构建 -->
+  <div class="submodule">
+    <div class="submodule-head">提示模板构建 <span class="tag">2 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">模板可视化编辑器</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）模板输入与编辑：富文本编辑器，支持复制/粘贴/查找/替换</li>
+              <li>（2）变量定义与管理：特定格式定义变量，侧边栏自动识别列出，可添加描述和默认值</li>
+              <li>（3）模板预览功能：点击"预览"，输入变量示例值，展示填充后的完整提示</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「提示学习算法」</span>
+            <span class="step">→ 子Tab「提示模板构建」</span>
+            <span class="step">→ 左侧 <span class="final">「模板可视化编辑器」</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">文本编辑区 → 已识别变量列表(input/format+描述) → 变量默认值输入 → 「预览」弹窗(输入示例值→展示完整提示)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">模板库管理</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）模板保存与分类：保存时输入名称、选择任务类别、添加标签</li>
+              <li>（2）模板检索与复用：模板库页面展示已保存模板，按名称/类别/标签搜索筛选，一键"加载到编辑器"</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 右侧 <span class="final">「模板库」</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">模板卡片列表(名称/类别标签/评分/模型) + 搜索框 + 点击「保存模板」弹窗(名称/类别/标签) + 点击模板卡片「加载到编辑器」</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 多模型兼容支持 -->
+  <div class="submodule">
+    <div class="submodule-head">多模型兼容支持 <span class="tag">2 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">模型选择与配置界面</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）模型列表展示：下拉/卡片视图展示支持的预训练模型(GLM/Qwen/DeepSeek)，标注版本和大小</li>
+              <li>（2）模型参数配置：选择模型后动态展示推理参数(温度/Top-p/最大生成长度)，提供滑块或输入框</li>
+              <li>（3）模型连接状态监测：顶部状态栏显示连接状态(绿色已连接/红色未连接)，提供加载进度</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「提示学习算法」</span>
+            <span class="step">→ 子Tab「多模型兼容支持」</span>
+            <span class="step">→ <span class="final">模型卡片列表 + 参数配置面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">Qwen2.5/DeepSeek/GLM卡片(版本/大小+连接状态绿点) → 温度滑块/Top-p滑块/最大长度/重复惩罚 + 统一调用接口说明</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">模型接口适配层</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）统一调用接口封装：后端封装不同模型API为统一内部接口，用户无感知</li>
+              <li>（2）输入输出格式标准化：自动处理不同模型输入输出差异，统一格式返回</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 参数配置面板下方</span>
+            <span class="step">→ <span class="final">「统一调用接口」说明区</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">说明文字：系统后端将不同模型API封装为统一内部调用接口，前端操作自动转发，输入输出格式已标准化</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 智能提示优化 -->
+  <div class="submodule">
+    <div class="submodule-head">智能提示优化 <span class="tag">2 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">优化策略配置面板</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）优化算法选择：下拉菜单选择不同优化策略</li>
+              <li>（2）样本数据上传与配置：文件上传或粘贴标注样本，展示样本预览，设置输入字段和标签字段</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「提示学习算法」</span>
+            <span class="step">→ 子Tab「智能提示优化」</span>
+            <span class="step">→ 左侧 <span class="final">「优化策略配置」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">优化算法下拉(指令重构+示例增强/梯度引导/进化搜索/蒙特卡洛树搜索) + 样本上传区(.csv/.jsonl) + 样本预览(输入字段/标签字段/样本数)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">优化过程监控与结果展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）优化进度可视化：实时进度条和日志窗口，显示迭代轮次/尝试提示数/最优性能指标</li>
+              <li>（2）优化结果对比视图：表格展示原始提示与优化后提示的性能对比(准确率/召回率/F1)</li>
+              <li>（3）优化结果应用：一键"应用"优化后提示，自动替换编辑器模板</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 右侧 <span class="final">「优化过程监控」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">迭代进度条(第8/10轮) + 实时日志(迭代/F1) + 优化结果对比表(原始vs优化v2:准确率/召回率/F1) → 点击「应用」替换模板</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 算法解释与迁移 -->
+  <div class="submodule">
+    <div class="submodule-head">算法解释与迁移 <span class="tag">2 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">提示影响分析视图</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）提示解构与变体生成：标记提示中不同部分(指令/背景/示例/格式)，自动生成对比变体</li>
+              <li>（2）批量测试与并行对比视图：同配置批量运行所有变体，并排展示输入输出，<b>差异高亮技术直观显示文本差异</b></li>
+              <li>（3）成分影响力总结：自动总结哪个成分改动产生决定性/风格/轻微影响，给出优化建议</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「提示学习算法」</span>
+            <span class="step">→ 子Tab「算法解释与迁移」</span>
+            <span class="step">→ <span class="final">「提示影响分析」+「并行对比视图」</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">成分标记(指令/背景/示例/格式) → 「生成变体并批量测试」 → 对比表(变体/改动成分/输出摘要/影响等级) + <b>输出文本差异对比(绿色新增/红色删除线高亮)</b> + 成分影响力总结</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">知识迁移管理界面</td>
+          <td class="req-detail">
+            <ul>
+              <li>导出优化后的提示及配置(模型/任务类型/性能指标)为JSON文件，支持导入复用</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「知识迁移管理」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">可导出内容说明(模板/变量/模型/任务/指标/优化历史) → 「导出 JSON」按钮 + 「导入配置」按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 下游任务快速适配 -->
+  <div class="submodule">
+    <div class="submodule-head">下游任务快速适配 <span class="tag">2 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">标准任务模板库</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）任务类型与模板选择：任务库包含文本生成/文本分类/命名实体识别(至少3种)，选择后加载预设提示模板</li>
+              <li>（2）任务参数快速配置：简化参数配置界面</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「提示学习算法」</span>
+            <span class="step">→ 子Tab「下游任务快速适配」</span>
+            <span class="step">→ <span class="final">标准任务模板库(6种任务卡片)</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">文本生成/文本分类/命名实体识别/摘要生成/代码生成/翻译 → 点击任务卡片加载预设模板</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">一键式任务测试与部署</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）交互式测试界面：输入框+运行按钮，即时展示模型输出</li>
+              <li>（2）批量测试功能：文件上传接口(.txt/.csv)，逐条处理汇总展示，支持结果文件下载</li>
+              <li>（3）API接口代码生成：点击"生成API"，生成标准API代码(Python requests/cURL)+详细API文档</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「一键式任务测试与部署」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">左侧：交互式测试(输入框+运行+输出结果) | 右侧：批量测试(上传文件) + API代码生成(Python代码块+「生成API文档」弹窗)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ 2.3.3 反向提示算法 ============ -->
+<div class="module" id="m3">
+  <div class="module-head"><span class="module-num">3</span>2.3.3 反向提示算法</div>
+
+  <!-- 提示反向推断 -->
+  <div class="submodule">
+    <div class="submodule-head">提示反向推断 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">文本输入与分析触发</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）文本输入区：专用文本输入框，支持多行，具备字数统计</li>
+              <li>（2）分析操作按钮："开始分析"触发推断，"清空"重置输入</li>
+              <li>（3）示例文本加载：内置不同场景示例，点击"加载示例"快速填充</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「反向提示算法」</span>
+            <span class="step">→ 子Tab「提示反向推断」</span>
+            <span class="step">→ 左侧 <span class="final">「文本输入与分析触发」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">多行文本框(实时字数统计) → 「加载示例」/「清空」/「开始分析」按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">推断结果结构化展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）原始提示词重构：文本框展示推断的最可能完整提示词，可一键复制</li>
+              <li>（2）指令识别：高亮提示词中指令部分，以标签形式列出核心指令</li>
+              <li>（3）意图分类标签：自动分类提示意图(文本创作/信息问答/代码生成/逻辑推理)，标签展示</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 点击「开始分析」</span>
+            <span class="step">→ 右侧 <span class="final">推断结果面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">重构提示词(文本框) + 关键指令(标签:学术摘要/核心方法/实验指标) + 意图分类(badge:摘要生成/信息抽取)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">推断置信度评估</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）整体置信度评分：0-100%综合评分，进度条展示</li>
+              <li>（2）分项置信度展示：每项细分结果独立置信度评分</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 推断结果面板顶部</span>
+            <span class="step">→ <span class="final">置信度评分(badge)</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">整体置信度 87% 绿色标签展示</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 多模型适配机制 -->
+  <div class="submodule">
+    <div class="submodule-head">多模型适配机制 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">模型选择界面</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）模型下拉列表：列出支持的主流大语言模型(Llama/GLM/Qwen/DeepSeek系列)</li>
+              <li>（2）模型搜索功能：列表内提供搜索功能，输入关键词快速定位</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「反向提示算法」</span>
+            <span class="step">→ 子Tab「多模型适配机制」</span>
+            <span class="step">→ 左侧 <span class="final">「模型选择」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">搜索框 + 模型卡片列表(Llama 3/GLM-4/Qwen2.5/DeepSeek-V3)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">模型信息展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）基本信息卡片：模型名称/版本号/架构类型/参数规模</li>
+              <li>（2）适配状态指示：明确指示"已优化支持"/"基础支持"</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 右侧 <span class="final">「模型信息」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">基本信息列表(名称/版本/架构/参数规模/适配状态) + 模型卡片右侧适配状态标签(已优化支持/基础支持)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">适配策略自动调用</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）策略提示信息：处理时显示"正在使用XX模型专用适配策略进行分析"</li>
+              <li>（2）策略结果对比：支持同一段文本使用不同模型适配策略分析，结果并列展示对比</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 模型信息面板下方</span>
+            <span class="step">→ <span class="final">「适配策略自动调用」说明 + 「多模型策略对比」按钮</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">分析时显示策略提示文字 → 点击「多模型策略对比」弹窗展示不同模型重构提示词与置信度对比表</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 多场景任务适配 -->
+  <div class="submodule">
+    <div class="submodule-head">多场景任务适配 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">任务类型选择接口</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）任务类型下拉菜单：选择生成文本所属任务场景(通用文本生成/摘要生成/代码生成/翻译/问答对生成)</li>
+              <li>（2）任务描述说明：选择时显示该任务简要描述和典型文本特征</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「反向提示算法」</span>
+            <span class="step">→ 子Tab「多场景任务适配」</span>
+            <span class="step">→ <span class="final">任务类型卡片(5种场景)</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">通用文本生成/摘要生成/代码生成/翻译/问答对生成 → 卡片含任务描述说明</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">任务特定参数配置</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）动态参数面板：针对特定任务动态显示参数配置选项</li>
+              <li>（2）参数应用提示：配置后提示"已应用XX任务特定参数"</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「任务特定参数配置」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">分析深度/指令识别粒度/输出语言/对比模式 下拉 + 顶部"已应用：通用文本生成参数"标签</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">策略调整与权重应用</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）策略选择展示：结果展示区标注当前应用的分析策略</li>
+              <li>（2）权重可视化：图表形式(雷达图/柱状图)展示各分析维度权重分配(语法/语义/结构/关键词)</li>
+              <li>（3）场景化结果优化：基于任务场景的推断结果针对性优化</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「策略调整与权重应用」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">当前策略标签(通用文本生成) + 分析维度权重进度条(语法25%/语义35%/结构20%/关键词20%) + 权重雷达图(SVG) + <b>场景化结果优化说明(增强语义权重/优化指令粒度策略)</b></span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ 2.3.4 小样本学习算法 ============ -->
+<div class="module" id="m4">
+  <div class="module-head"><span class="module-num">4</span>2.3.4 小样本学习算法</div>
+
+  <!-- 算法框架集成 -->
+  <div class="submodule">
+    <div class="submodule-head">算法框架集成 <span class="tag">4 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">算法框架选择</td>
+          <td class="req-detail">
+            <ul>
+              <li>分类选择功能：度量学习/优化学习/元学习分类标签，点击后筛选展示该分类下可用模型列表</li>
+              <li>内置支持Prototypical Networks/Matching Networks/Relation Networks等主流模型</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「小样本学习算法」</span>
+            <span class="step">→ 子Tab「算法框架集成」</span>
+            <span class="step">→ 顶部 <span class="final">分类标签按钮组</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">度量学习/优化学习/元学习 → 点击筛选 → 下方展示对应分类模型卡片</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">模型选择与详情展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>选择具体模型后，右侧/下方动态展示模型详细信息卡片(模型简介/核心原理/适用场景/相关参数说明/<b>相关参考文献链接</b>)</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 点击模型卡片</span>
+            <span class="step">→ 右侧 <span class="final">模型详情面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">模型名称 + <b>适用场景(独立字段)</b> + <b>参考文献(可点击链接↗)</b> + 模型简介与核心原理 + 参数配置面板</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">参数配置面板</td>
+          <td class="req-detail">
+            <ul>
+              <li>表单形式展示所有可调参数(学习率/迭代次数/嵌入维度)，<b>每个参数项均包含参数名称、当前值、默认值、建议取值范围和详细描述</b></li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 模型详情面板下方</span>
+            <span class="step">→ <span class="final">「参数配置面板」表单</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">参数表格(参数名称/当前值/默认值/建议取值范围/详细描述) — 学习率(0.0001~0.1)/迭代次数(1000~50000)/嵌入维度(32~256)/N-way(3~20)/K-shot(1~10)/内部学习率(0.001~0.1)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">4</td>
+          <td class="req-name">配置管理功能</td>
+          <td class="req-detail">
+            <ul>
+              <li>保存/加载/删除配置：保存时输入配置名称，存储至个人配置库，后续可加载复用</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 参数配置面板下方</span>
+            <span class="step">→ <span class="final">「保存配置」/「加载配置」/「删除配置」按钮</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">保存弹窗(输入配置名称如"文本分类-原型网络-最优配置") → 加载弹窗(选择已保存配置) → 删除确认</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 评估基准构建 -->
+  <div class="submodule">
+    <div class="submodule-head">评估基准构建 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">评估任务配置界面</td>
+          <td class="req-detail">
+            <ul>
+              <li>选择评测数据集(miniImageNet/tieredImageNet)、设定评测协议(N-way K-shot)、勾选待评估模型，点击"开始评估"</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「小样本学习算法」</span>
+            <span class="step">→ 子Tab「评估基准构建」</span>
+            <span class="step">→ <span class="final">「评估任务配置」面板</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">评测数据集下拉 + 评测协议下拉 + 待评估模型多选(标签输入) → 「开始评估」按钮</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">自动化评估执行与监控</td>
+          <td class="req-detail">
+            <ul>
+              <li>任务监控视图：实时显示评估进度/当前模型/已完成轮次/总轮次，日志输出执行步骤</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「评估执行与监控」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">进度条(模型2/3 · 轮次450/600) + 日志(数据加载完成/模型训练完成/Acc) + 评估中状态标签</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">评估报告生成与展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>（1）性能指标对比表格：准确率/精确率/召回率/F1，高亮最优值</li>
+              <li>（2）可视化对比图表：柱状图/雷达图，<b>用户可通过下拉框切换图表类型和对比维度</b></li>
+              <li>（3）详细结果分析：<b>混淆矩阵/学习曲线</b>，<b>点击模型名称查看特定类别详细表现及错误分类样本案例</b></li>
+              <li>（4）报告导出功能：导出为PDF或HTML文件</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「评估报告」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">性能指标对比表(高亮最优+模型名称可点击) + <b>图表类型下拉(柱状图/雷达图)+对比维度下拉</b> + 柱状图对比 + 雷达图对比(SVG) + <b>学习曲线(折线图)</b> + 混淆矩阵(5×5) → <b>点击模型名弹窗(错误分类样本案例表+分析建议)</b> → 「导出PDF」/「导出HTML」</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 下游任务适配 -->
+  <div class="submodule">
+    <div class="submodule-head">下游任务适配 <span class="tag">4 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">任务类型选择与模板加载</td>
+          <td class="req-detail">
+            <ul>
+              <li>任务创建向导第一步：选择任务类型(文本分类/图文匹配等)，自动加载标准化数据格式模板和模型接口，展示示例数据结构</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「小样本学习算法」</span>
+            <span class="step">→ 子Tab「下游任务适配」</span>
+            <span class="step">→ <span class="final">「任务类型选择与模板加载」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">任务卡片(文本分类/图文匹配/情感分析) → 点击加载模板 → 示例数据结构说明(JSON格式+字段说明)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">任务数据上传与预览</td>
+          <td class="req-detail">
+            <ul>
+              <li>上传数据文件(CSV/JSONL)，系统自动解析，表格形式展示前10行预览，<b>格式有误给出明确错误提示</b></li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「任务数据上传与预览」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">上传区(CSV/JSONL) → 点击上传弹窗(<b>格式校验通过✓ + 格式错误提示示例⚠</b>) → 数据预览表格(前10行:text+label列)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">模型训练与监控</td>
+          <td class="req-detail">
+            <ul>
+              <li>训练监控仪表板：实时展示损失函数曲线/验证集准确率曲线(动态折线图)，支持暂停/继续，<b>自动保存最优模型快照</b></li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「模型训练与监控」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">训练中状态标签 + 暂停按钮 + 损失函数曲线(折线图) + 验证集准确率曲线(折线图) + <b>最优模型快照说明(Epoch 85·Val Acc 62.4%·自动保存)</b></span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">4</td>
+          <td class="req-name">模型推理与测试</td>
+          <td class="req-detail">
+            <ul>
+              <li>训练完成的模型用于在线推理测试：简洁推理界面，根据任务类型变化，即时体验模型效果</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → <span class="final">「模型推理与测试」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">测试输入框 → 「运行推理」按钮 → 推理结果展示(预测类别+置信度)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 技术文档与支持 -->
+  <div class="submodule">
+    <div class="submodule-head">技术文档与支持 <span class="tag">3 个功能点</span></div>
+    <table class="req-table">
+      <thead><tr><th>编号</th><th>功能名称</th><th>需规要求（细粒度）</th><th>原型操作路径</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="req-id">1</td>
+          <td class="req-name">在线文档中心</td>
+          <td class="req-detail">
+            <ul>
+              <li>左侧导航栏+右侧内容区布局，树状结构组织(快速入门/算法原理/API参考/开发指南/常见问题)，点击加载对应内容</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">「小样本学习算法」</span>
+            <span class="step">→ 子Tab「技术文档与支持」</span>
+            <span class="step">→ <span class="final">在线文档中心</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">左侧树状导航(快速入门/算法原理/API参考/开发指南/常见问题) + 右侧内容区(度量学习原理/ProtoNet代码示例)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">2</td>
+          <td class="req-name">文档检索功能</td>
+          <td class="req-detail">
+            <ul>
+              <li>顶部全局搜索框，输入关键词检索所有文档，列表展示匹配章节及摘要，点击跳转</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 文档中心顶部</span>
+            <span class="step">→ <span class="final">搜索框</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">输入"PrototypicalNetworks"/"训练接口"等关键词检索</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+        <tr>
+          <td class="req-id">3</td>
+          <td class="req-name">示例代码与案例展示</td>
+          <td class="req-detail">
+            <ul>
+              <li>API参考和开发指南中提供代码示例(语法高亮+复制按钮)，端到端案例(如"使用Relation Network进行五分类任务")描述从数据准备到模型调用的每步操作</li>
+            </ul>
+          </td>
+          <td class="req-path">
+            <span class="step">同上 → 文档内容区</span>
+            <span class="step">→ <span class="final">代码示例 + 端到端案例</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">ProtoNet代码块(语法高亮+复制) + "使用Relation Network进行五分类任务"端到端案例(4步骤)</span>
+          </td>
+          <td><span class="status done">已实现</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <p>大模型算法服务需规核对书 &nbsp;|&nbsp; 覆盖 2.3.1 ~ 2.3.4 全部功能点 &nbsp;|&nbsp; 原型地址：http://localhost:8090</p>
+</footer>
+
+</div>
+</body>
+</html>
