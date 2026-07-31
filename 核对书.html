@@ -62,7 +62,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
 <header>
   <h1>大模型算法服务 — 需规核对书</h1>
   <p>需求规格说明书 &times; 原型页面 功能点映射</p>
-  <div class="meta">核对范围：2.3 大模型算法服务（图计算算法工具集 / 提示学习算法 / 反向提示算法 / 小样本学习算法）&nbsp;|&nbsp;核对日期：2026-07-30（第二轮查漏补缺更新）</div>
+  <div class="meta">核对范围：2.3 大模型算法服务（图计算算法工具集 / 提示学习算法 / 反向提示算法 / 小样本学习算法）&nbsp;|&nbsp;核对日期：2026-07-31（第三轮逐功能点比对校正，操作路径与原型实际一致）</div>
 </header>
 
 <div class="module-nav">
@@ -107,7 +107,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">→ 顶部Tab「图计算算法工具集」</span>
             <span class="step">→ 子Tab「预训练框架构建」</span>
             <span class="step">→ <span class="final">「预训练任务配置」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">数据源下拉选择(含"通过API对接外部数据源"选项→展开API地址/Key/认证方式/测试连接) + 任务类型下拉(联动提示) + 图结构摘要自动展示 + 负采样策略/批次大小配置</span>
+            <span class="step" style="color:var(--muted);font-size:11px">数据源下拉(已上传图数据集CSV/节点特征文件/API对接外部数据源) + 任务类型下拉(边对比/子图对比，联动原理提示) + 图结构摘要自动展示(节点数/边数/特征维度) + 负采样策略/批次采样大小配置</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -142,7 +142,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上路径 → 「预训练框架构建」</span>
             <span class="step">→ <span class="final">「训练任务监控与可视化」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">开始训练/暂停/停止按钮 + 损失函数折线图 + GPU/CPU/内存/学习率进度条 + 训练日志面板(含epoch信息)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">开始训练/暂停/停止按钮 + 损失函数/学习率变化曲线(折线图) + GPU/CPU/内存/Epoch 指标卡 + 训练日志面板(含 epoch 耗时/数据加载信息)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -159,7 +159,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上路径 → 「预训练框架构建」</span>
             <span class="step">→ <span class="final">「模型管理与导出」表格</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">模型列表(名称/任务/时间/指标) → 点击「详情」打开侧边抽屉 → 点击「导出」打包下载</span>
+            <span class="step" style="color:var(--muted);font-size:11px">模型列表(名称/创建时间/任务配置/最终性能) → 点击「详情」查看配置与曲线 → 选择导出格式(PyTorch .pth / ONNX) → 点击「导出」下载</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -267,7 +267,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">「图计算算法工具集」</span>
             <span class="step">→ 子Tab「技术文档与开发支持」</span>
             <span class="step">→ <span class="final">在线技术文档中心</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">左侧树状导航(快速开始/用户指南/算法原理/常见问题) + 顶部搜索框 + 右侧Markdown内容区(代码块+复制按钮)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">左侧导航(快速入门/训练配置/监控与日志/API参考/场景示例/常见问题) + 顶部全文搜索框 + 右侧内容区(Markdown渲染+代码块+复制)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -284,7 +284,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上 → 「技术文档与开发支持」</span>
             <span class="step">→ <span class="final">「API接口参考手册」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">接口模块下拉 + 接口选择 + 参数详情列表(URL/Content-Type/字段说明/返回示例) + 「在线调试」发送请求按钮+cURL代码</span>
+            <span class="step" style="color:var(--muted);font-size:11px">API 接口列表(POST/GET/DELETE 等方法) + 参数表(参数/类型/必填/说明+示例) + 代码切换(cURL/Python/Java) + 「在线调试」发送请求查看响应</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -301,7 +301,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上 → 「技术文档与开发支持」</span>
             <span class="step">→ <span class="final">「开发示例与代码库」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">示例场景卡片(GCN论文分类/Graph2Vec相似度) + 代码块(语法高亮+复制) + 「下载代码包」+「查看README」按钮</span>
+            <span class="step" style="color:var(--muted);font-size:11px">场景示例章节(典型应用场景) + 代码块(语法高亮+复制) + 「下载 .ipynb / .py 示例」按钮(附环境配置说明)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -349,7 +349,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → 右侧 <span class="final">「模板库」</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">模板卡片列表(名称/类别标签/评分/模型) + 搜索框 + 点击「保存模板」弹窗(名称/类别/标签) + 点击模板卡片「加载到编辑器」</span>
+            <span class="step" style="color:var(--muted);font-size:11px">模板卡片列表(名称/类别/标签) + 搜索框(按名称/分类/标签筛选) + 「保存当前模板」按钮(名称/类别/标签) + 点击模板卡片「加载到编辑器」</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -377,7 +377,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">「提示学习算法」</span>
             <span class="step">→ 子Tab「多模型兼容支持」</span>
             <span class="step">→ <span class="final">模型卡片列表 + 参数配置面板</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">Qwen2.5/DeepSeek/GLM卡片(版本/大小+连接状态绿点) → 温度滑块/Top-p滑块/最大长度/重复惩罚 + 统一调用接口说明</span>
+            <span class="step" style="color:var(--muted);font-size:11px">GLM-4/Qwen2.5/DeepSeek-V3 卡片(版本/大小 + 连接状态绿点/加载进度) → 温度滑块/Top-p 滑块/最大生成长度 + 当前连接状态与加载进度</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -420,7 +420,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">「提示学习算法」</span>
             <span class="step">→ 子Tab「智能提示优化」</span>
             <span class="step">→ 左侧 <span class="final">「优化策略配置」面板</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">优化算法下拉(指令重构+示例增强/梯度引导/进化搜索/蒙特卡洛树搜索) + 样本上传区(.csv/.jsonl) + 样本预览(输入字段/标签字段/样本数)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">优化算法下拉(自动搜索 APE / 梯度引导 ProTeGi / 进化搜索) + 样本来源(文件上传/文本框粘贴) + 标注样本预览(输入字段/标签字段) → 「启动优化任务」</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -436,7 +436,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → 右侧 <span class="final">「优化过程监控」面板</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">迭代进度条(第8/10轮) + 实时日志(迭代/F1) + 优化结果对比表(原始vs优化v2:准确率/召回率/F1) → 点击「应用」替换模板</span>
+            <span class="step" style="color:var(--muted);font-size:11px">指标卡(迭代 8/20 · 已尝试提示 142 · 当前最优 F1 0.881 · 进度 40%) + 实时日志(迭代/F1) + 优化结果对比表(原始 vs 优化后:准确率/召回率/F1，高亮提升) → 「一键应用」替换编辑器模板</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -464,7 +464,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">「提示学习算法」</span>
             <span class="step">→ 子Tab「算法解释与迁移」</span>
             <span class="step">→ <span class="final">「提示影响分析」+「并行对比视图」</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">成分标记(指令/背景/示例/格式) → 「生成变体并批量测试」 → 对比表(变体/改动成分/输出摘要/影响等级) + <b>输出文本差异对比(绿色新增/红色删除线高亮)</b> + 成分影响力总结</span>
+            <span class="step" style="color:var(--muted);font-size:11px">成分标记复选(任务指令/背景信息/示例/格式要求) → 「生成提示变体」 → 批量并行对比(变体A移除格式要求 vs 变体B完整提示，并排展示输入/输出) + 成分影响力总结(决定性:格式要求/风格:任务指令/轻微:背景信息 + 优化建议)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -504,8 +504,8 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">「提示学习算法」</span>
             <span class="step">→ 子Tab「下游任务快速适配」</span>
-            <span class="step">→ <span class="final">标准任务模板库(6种任务卡片)</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">文本生成/文本分类/命名实体识别/摘要生成/代码生成/翻译 → 点击任务卡片加载预设模板</span>
+            <span class="step">→ <span class="final">标准任务模板库(任务卡片)</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">文本生成/文本分类/命名实体识别(至少3种) → 点击任务卡片加载预设提示模板 + 简化参数配置(温度/最大长度)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -521,7 +521,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → <span class="final">「一键式任务测试与部署」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">左侧：交互式测试(输入框+运行+输出结果) | 右侧：批量测试(上传文件) + API代码生成(Python代码块+「生成API文档」弹窗)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">交互式测试(输入框+运行+模型输出) → 批量测试(上传 .txt/.csv + 结果列表 + 下载结果) → API接口代码生成(「生成API」按钮 + Python requests 代码块 + API 文档说明)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -571,7 +571,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上 → 点击「开始分析」</span>
             <span class="step">→ 右侧 <span class="final">推断结果面板</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">重构提示词(文本框) + 关键指令(标签:学术摘要/核心方法/实验指标) + 意图分类(badge:摘要生成/信息抽取)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">重构提示词(文本框 + 一键复制) + 指令识别高亮(badge:请以JSON格式生成/总结以下内容/扮演一个XX角色) + 意图分类标签(chip:文本创作/信息问答/代码生成/逻辑推理)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -585,9 +585,9 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             </ul>
           </td>
           <td class="req-path">
-            <span class="step">同上 → 推断结果面板顶部</span>
-            <span class="step">→ <span class="final">置信度评分(badge)</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">整体置信度 87% 绿色标签展示</span>
+            <span class="step">同上 → 推断结果面板下方</span>
+            <span class="step">→ <span class="final">置信度评估区</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">整体置信度 86% 进度条 + 分项置信度(重构提示词 88% / 指令识别 82% / 意图分类 90%)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -614,7 +614,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             <span class="step">「反向提示算法」</span>
             <span class="step">→ 子Tab「多模型适配机制」</span>
             <span class="step">→ 左侧 <span class="final">「模型选择」面板</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">搜索框 + 模型卡片列表(Llama 3/GLM-4/Qwen2.5/DeepSeek-V3)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">模型下拉列表(Llama-3/GLM-4/Qwen2.5/DeepSeek-V3) + 模型搜索框(输入关键词快速定位)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -644,8 +644,8 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → 模型信息面板下方</span>
-            <span class="step">→ <span class="final">「适配策略自动调用」说明 + 「多模型策略对比」按钮</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">分析时显示策略提示文字 → 点击「多模型策略对比」弹窗展示不同模型重构提示词与置信度对比表</span>
+            <span class="step">→ <span class="final">「适配策略自动调用」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">策略提示信息("正在使用 GLM-4 专用适配策略进行分析") + 策略结果对比(GLM-4 vs Qwen2.5 并列展示推断提示词与置信度)</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -687,7 +687,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → <span class="final">「任务特定参数配置」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">分析深度/指令识别粒度/输出语言/对比模式 下拉 + 顶部"已应用：通用文本生成参数"标签</span>
+            <span class="step" style="color:var(--muted);font-size:11px">动态参数面板(最大长度/风格约束 下拉) + "已应用「通用文本生成」任务特定参数"提示</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -703,7 +703,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           </td>
           <td class="req-path">
             <span class="step">同上 → <span class="final">「策略调整与权重应用」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">当前策略标签(通用文本生成) + 分析维度权重进度条(语法25%/语义35%/结构20%/关键词20%) + 权重雷达图(SVG) + <b>场景化结果优化说明(增强语义权重/优化指令粒度策略)</b></span>
+            <span class="step" style="color:var(--muted);font-size:11px">当前应用分析策略(通用生成策略 v2) + 权重可视化(雷达图 + 柱状图: 语法0.3/语义0.4/结构0.2/关键词0.1) + <b>场景化优化(已针对通用生成优化)</b></span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -765,7 +765,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
           <td class="req-path">
             <span class="step">同上 → 模型详情面板下方</span>
             <span class="step">→ <span class="final">「参数配置面板」表单</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">参数表格(参数名称/当前值/默认值/建议取值范围/详细描述) — 学习率(0.0001~0.1)/迭代次数(1000~50000)/嵌入维度(32~256)/N-way(3~20)/K-shot(1~10)/内部学习率(0.001~0.1)</span>
+            <span class="step" style="color:var(--muted);font-size:11px">参数表格(参数名称/当前值/默认值/建议取值范围/详细描述) — 学习率(1e-4—1e-2)/迭代次数(10K—100K)/嵌入维度(64—512)，参数值可直接修改或下拉选择</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -836,8 +836,8 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
             </ul>
           </td>
           <td class="req-path">
-            <span class="step">同上 → <span class="final">「评估报告」区域</span></span>
-            <span class="step" style="color:var(--muted);font-size:11px">性能指标对比表(高亮最优+模型名称可点击) + <b>图表类型下拉(柱状图/雷达图)+对比维度下拉</b> + 柱状图对比 + 雷达图对比(SVG) + <b>学习曲线(折线图)</b> + 混淆矩阵(5×5) → <b>点击模型名弹窗(错误分类样本案例表+分析建议)</b> → 「导出PDF」/「导出HTML」</span>
+            <span class="step">同上 → <span class="final">「评估报告生成与展示」区域</span></span>
+            <span class="step" style="color:var(--muted);font-size:11px">（1）性能指标对比表(高亮最优值 + <b>模型名可点击链接</b>) →（2）<b>图表类型下拉(柱状图/雷达图) + 对比维度下拉</b> + 柱状图 SVG + 雷达图 SVG →（3）<b>混淆矩阵(5×5 热力图)</b> + <b>学习曲线 SVG(损失/验证准确率双线)</b> + <b>点击模型名定位错误分类样本案例表(真实/预测/样本/置信度) + 分析建议</b> →（4）「导出PDF」/「导出HTML」</span>
           </td>
           <td><span class="status done">已实现</span></td>
         </tr>
@@ -971,7 +971,7 @@ footer{text-align:center;padding:24px 0;color:var(--muted);font-size:12px;border
 </div>
 
 <footer>
-  <p>大模型算法服务需规核对书 &nbsp;|&nbsp; 覆盖 2.3.1 ~ 2.3.4 全部功能点 &nbsp;|&nbsp; 原型地址：http://localhost:8090</p>
+  <p>大模型算法服务需规核对书 &nbsp;|&nbsp; 覆盖 2.3.1 ~ 2.3.4 全部 37 个功能点 &nbsp;|&nbsp; 原型地址：https://junlingz.github.io/compliant-maas/</p>
 </footer>
 
 </div>
