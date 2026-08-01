@@ -74,6 +74,21 @@ for (const id of moduleIds) {
 check(sectionCount === 39, `expected 39 sections, got ${sectionCount}`);
 check(productionScreensVisited === 39, `expected 39 production screens, got ${productionScreensVisited}`);
 
+// Remote algorithm-service board must survive the superscale merge unchanged and remain routable.
+const algorithmModules = [
+  ["graphcompute", "图计算算法工具集", 3],
+  ["promptlearning", "提示学习算法", 5],
+  ["reverseprompt", "反向提示算法", 3],
+  ["fewshot", "小样本学习算法", 4],
+];
+for (const [id, title, expectedSections] of algorithmModules) {
+  check((await page.locator(`[data-page="${id}"]`).count()) > 0, `${title}: navigation was overwritten during merge`);
+  await page.locator(`[data-page="${id}"]`).first().click();
+  check((await page.locator(".page-toolbar h1").textContent()) === title, `${title}: route renders the wrong page`);
+  check((await page.locator(`[data-module="${id}"][data-section]`).count()) === expectedSections, `${title}: expected ${expectedSections} sections`);
+  check((await page.locator(".work-card h2").count()) > 0, `${title}: workbench content is missing`);
+}
+
 // Autoregressive configuration validation, export and real detail drawer.
 await page.locator('[data-page="autoregressive"]').first().click();
 await page.locator('[data-section="0"]').click();
@@ -432,6 +447,43 @@ const pythonApiCode = await page.locator("#apiCode").innerText();
 check(pythonApiCode.includes("\n") && !pythonApiCode.includes("\\n"), "Python API example contains literal escaped newlines");
 check(pythonApiCode.split("\n").length >= 3, "Python API example is not formatted as runnable multiline code");
 
+// Superscale model board: isolated business IA, dependency-aware creation and 36-item acceptance traceability.
+await page.locator('[data-page="superscale-models"]').first().click();
+check((await page.locator('[data-module="superscale-models"]').count()) === 9, "superscale board does not expose 9 business sections");
+check((await page.locator(".super-family").count()) === 5, "superscale overview does not expose five model families");
+for (let index = 0; index < 9; index += 1) {
+  await page.locator(`[data-module="superscale-models"][data-section="${index}"]`).click();
+  check((await page.locator(".work-card h2").count()) > 0, `superscale section ${index}: no business title`);
+}
+await page.locator('[data-module="superscale-models"][data-section="5"]').click();
+const evalRowsBefore = await page.locator(".super-table tbody tr").count();
+await page.locator('[data-action="superOpenDrawer"][data-super-kind="evaluation"]').click();
+check(await page.locator("#drawer").evaluate((el) => el.classList.contains("product-drawer")), "superscale evaluation did not open the product drawer");
+check((await page.locator("#superEvalTask").count()) === 1 && (await page.locator("#superEvalModel").count()) === 1 && (await page.locator("#superEvalDataset").count()) === 1, "superscale evaluation lacks dependency controls");
+await page.locator('[data-action="superEvalType"][data-super-family="多模态"]').click();
+check((await page.locator("#superEvalTask").innerText()).includes("视觉问答"), "superscale model type did not link evaluation tasks");
+check((await page.locator("#superEvalDataset").innerText()).includes("MMBench"), "superscale model type did not link datasets");
+await page.locator("#superEvalName").fill("");
+await page.locator('[data-action="superSubmitDrawer"]').click();
+check((await page.locator("#drawerBackdrop.open").count()) === 1, "superscale required validation allowed an empty task name");
+await page.locator("#superEvalName").fill("多模态综合能力验收评测");
+await page.locator('[data-action="superSubmitDrawer"]').click();
+check((await page.locator("#modalBackdrop.open").count()) === 1, "superscale valid evaluation did not create a task");
+await page.locator('[data-action="confirmModal"]').click();
+check((await page.locator(".super-table tbody tr").count()) === evalRowsBefore + 1, "superscale evaluation task was not added to the list");
+await page.locator('[data-module="superscale-models"][data-section="8"]').click();
+check((await page.locator("[data-super-map-row]").count()) === 36, "superscale acceptance map does not contain 36 leaf requirements");
+await page.locator("#superMappingSearch").fill("1.3.2.5.2.4.3.1.5");
+await page.locator('[data-action="superFilterMapping"]').click();
+check((await page.locator("[data-super-map-row]").count()) === 1, "superscale clause search did not isolate one requirement");
+check((await page.locator("[data-super-map-row]").innerText()).includes("多模态推理能力"), "superscale clause search returned the wrong requirement");
+await page.locator('[data-action="superBusinessEntry"]').click();
+check((await page.locator(".super-section-head h2").textContent()) === "能力体验", "superscale acceptance business entry did not return to the real page");
+await page.locator('[data-action="superAcceptanceInspector"]').click();
+check((await page.locator("#drawerBackdrop.open").count()) === 1 && (await page.locator("#drawer").innerText()).includes("多模态推理能力"), "superscale page inspector lacks linked clauses");
+await page.keyboard.press("Escape");
+await page.screenshot({ path: screenshotPath("superscale-desktop.png"), fullPage: true });
+
 // Mobile navigation: scrim, focus trap, aria-expanded reset and no overflow.
 await page.setViewportSize({ width: 390, height: 844 });
 await page.goto(freshUrl("overview"), { waitUntil: "networkidle" });
@@ -453,6 +505,16 @@ await page.setViewportSize({ width: 320, height: 700 });
 await page.goto(freshUrl("evaluation"), { waitUntil: "networkidle" });
 const widths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
 check(widths.scroll === widths.inner, `320px viewport overflow: ${JSON.stringify(widths)}`);
+
+await page.goto(freshUrl("superscale-models"), { waitUntil: "networkidle" });
+await page.locator('[data-module="superscale-models"][data-section="5"]').click();
+await page.locator('[data-action="superOpenDrawer"][data-super-kind="evaluation"]').click();
+await page.waitForTimeout(300);
+check(await page.locator("#drawer").evaluate((el) => el.getBoundingClientRect().width === innerWidth), "superscale mobile product drawer is not full width");
+const superMobileWidths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
+check(superMobileWidths.scroll === superMobileWidths.inner, `superscale 320px viewport overflow: ${JSON.stringify(superMobileWidths)}`);
+await page.screenshot({ path: screenshotPath("superscale-mobile-drawer.png"), fullPage: true });
+await page.keyboard.press("Escape");
 
 // Standalone file:// execution.
 const filePage = await browser.newPage({ viewport: { width: 1200, height: 800 } });

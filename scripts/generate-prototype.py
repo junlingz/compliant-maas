@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import re
+from html import escape as xml_escape
 from pathlib import Path
 
 from docx import Document
@@ -95,6 +96,156 @@ def extract_requirements() -> tuple[list[dict], list[dict]]:
             detail = paragraphs[index + 1].text.strip() if index + 1 < len(paragraphs) else ""
             process.append({"name": paragraph.text.strip(), "description": detail})
     return modules, process
+
+
+SUPER_PAGE_NAMES = {
+    "overview": "业务总览",
+    "assets": "模型资产",
+    "experience": "能力体验",
+    "datasets": "数据资产",
+    "training": "训练与微调",
+    "evaluation": "模型测评",
+    "deployment": "部署与集成",
+    "education": "学科模型工厂",
+    "acceptance": "验收映射",
+}
+
+
+def super_page_for(clause: str) -> str:
+    if clause.startswith("1.3.2.5.2.4.1.2") or clause.startswith("1.3.2.5.2.4.2.2") or clause.startswith("1.3.2.5.2.4.3.2"):
+        return "deployment"
+    if clause.startswith("1.3.2.5.2.4.1.3"):
+        return "datasets"
+    if clause.startswith("1.3.2.5.2.4.4.2") or clause.startswith("1.3.2.5.2.4.5.1"):
+        return "training"
+    if clause.startswith("1.3.2.5.2.4.4.3") or clause.startswith("1.3.2.5.2.4.5.2"):
+        return "evaluation"
+    if clause.startswith("1.3.2.5.2.4.5.3"):
+        return "education"
+    return "experience"
+
+
+def super_family_for(clause: str) -> str:
+    families = {
+        "1": "中英语言",
+        "2": "面向认知",
+        "3": "多模态",
+        "4": "科技情报",
+        "5": "教育大模型",
+    }
+    tail = clause.removeprefix("1.3.2.5.2.4.")
+    return families[tail.split(".", 1)[0]]
+
+
+def super_evidence_for(page: str, name: str) -> tuple[str, str, str]:
+    mapping = {
+        "experience": ("模型与场景选择、输入区、参数面板、输出结果", "切换模型能力并运行样例，核验输入、输出与推理记录", "体验记录、输入输出快照、推理参数"),
+        "datasets": ("数据资产表、质量指标、版本与处理状态", "筛选并查看数据规模、质量门禁、处理链路和版本", "数据版本、质量报告、处理日志"),
+        "training": ("训练任务表、任务创建抽屉、参数与资源配置", "创建续训或微调任务并核验依赖、参数、状态和产物", "任务配置、训练日志、检查点、指标曲线"),
+        "evaluation": ("评测任务表、评测创建抽屉、指标与报告", "选择模型、任务、数据集和指标后提交评测并查看报告", "任务配置、指标结果、对比图、评测报告"),
+        "deployment": ("服务包与接口表、发布抽屉、运行状态", "选择模型版本与运行环境，发布并核验接口、健康与审计", "发布记录、API 契约、健康检查、调用日志"),
+        "education": ("五类学科模型卡、构建任务与版本", "选择学科底座和数据，创建学科模型并查看版本与评测", "构建配置、模型版本、学科评测报告"),
+    }
+    control, acceptance, evidence = mapping[page]
+    if "可视化" in name or "对比" in name:
+        control, acceptance, evidence = "指标看板、趋势图、模型对比表", "切换模型与指标，核验同尺度结果和差异", "看板快照、对比结果、导出报告"
+    return control, acceptance, evidence
+
+
+def extract_superscale_requirements() -> list[dict]:
+    doc = Document(DOCX)
+    paragraphs = doc.paragraphs
+    start = next(i for i, p in enumerate(paragraphs) if p.text.strip().startswith("1.3.2.5.2.") and "超大规模预训练模型" in p.text)
+    end = next(i for i, p in enumerate(paragraphs[start + 1 :], start + 1) if p.text.strip().startswith("1.3.2.5.3.") and "大模型算法服务" in p.text)
+    headings: list[dict] = []
+    heading_re = re.compile(r"^(1\.3\.2\.5\.2(?:\.\d+)+)\.(.+)$")
+    for index in range(start, end):
+        text = paragraphs[index].text.strip()
+        match = heading_re.match(text)
+        if match:
+            headings.append({"index": index, "clause": match.group(1), "name": match.group(2).strip()})
+    leaves: list[dict] = []
+    for position, heading in enumerate(headings):
+        clause = heading["clause"]
+        if not clause.startswith("1.3.2.5.2.4."):
+            continue
+        if any(other["clause"].startswith(clause + ".") for other in headings[position + 1 :]):
+            continue
+        next_index = headings[position + 1]["index"] if position + 1 < len(headings) else end
+        description = "".join(
+            p.text.strip()
+            for p in paragraphs[heading["index"] + 1 : next_index]
+            if p.text.strip()
+        )
+        page = super_page_for(clause)
+        control, acceptance, evidence = super_evidence_for(page, heading["name"])
+        leaves.append(
+            {
+                "id": f"SUPER-{len(leaves) + 1:02d}",
+                "clause": clause,
+                "name": heading["name"],
+                "family": super_family_for(clause),
+                "page": page,
+                "page_name": SUPER_PAGE_NAMES[page],
+                "description": description,
+                "control": control,
+                "acceptance": acceptance,
+                "evidence": evidence,
+                "status": "可验收",
+            }
+        )
+    if len(leaves) != 36:
+        raise RuntimeError(f"Expected 36 superscale leaf requirements, got {len(leaves)}")
+    return leaves
+
+
+def superscale_matrix_markdown(requirements: list[dict]) -> str:
+    lines = [
+        "# 超大规模预训练模型验收功能映射表",
+        "",
+        f"- 来源：`{DOCX.name}`",
+        "- 范围：仅覆盖 `1.3.2.5.2 超大规模预训练模型`；不包含 `1.3.2.5.3 大模型算法服务`及其他板块。",
+        "- 产品组织：业务页面作为主入口，条款编号作为搜索、徽标、验收抽屉和映射表中的追溯索引。",
+        f"- 验收项：{len(requirements)} 项。",
+        "",
+        "| 条款编号 | 模型族 | 标书能力 | 业务入口 | 页面控件/交互 | 验收操作 | 验收证据 | 状态 |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for item in requirements:
+        lines.append(
+            f"| {item['clause']} | {item['family']} | {item['name']} | 超大规模预训练模型 → {item['page_name']} | {item['control']} | {item['acceptance']} | {item['evidence']} | {item['status']} |"
+        )
+    lines += ["", "## 验收使用说明", "", "1. 从左侧进入“超大规模预训练模型”，按业务完成模型、数据、训练、测评和部署操作。", "2. 页面标题旁的“关联条款”可打开当前页面的验收检查器。", "3. 在“验收映射”中可按条款号、能力名称、模型族或业务入口检索，并跳转回真实业务页面。", "4. 评审证据以任务配置、运行日志、指标结果、报告和发布记录为准。", ""]
+    return "\n".join(lines)
+
+
+def superscale_feishu_xml(requirements: list[dict]) -> str:
+    family_counts: dict[str, int] = {}
+    for item in requirements:
+        family_counts[item["family"]] = family_counts.get(item["family"], 0) + 1
+    summary_rows = "".join(
+        f"<tr><td>{xml_escape(family)}</td><td>{count}</td><td>{xml_escape('、'.join(sorted({r['page_name'] for r in requirements if r['family'] == family})))}</td></tr>"
+        for family, count in family_counts.items()
+    )
+    detail_rows = "".join(
+        "<tr>"
+        f"<td>{xml_escape(item['clause'])}</td><td>{xml_escape(item['family'])}</td><td>{xml_escape(item['name'])}</td>"
+        f"<td>{xml_escape(item['page_name'])}</td><td>{xml_escape(item['control'])}</td>"
+        f"<td>{xml_escape(item['acceptance'])}</td><td>{xml_escape(item['evidence'])}</td>"
+        "</tr>"
+        for item in requirements
+    )
+    return (
+        "<title>超大规模预训练模型验收功能映射表</title>"
+        "<h1>1. 文档说明</h1>"
+        "<p><b>验收范围：</b>仅覆盖 1.3.2.5.2 超大规模预训练模型，不包含 1.3.2.5.3 大模型算法服务及其他板块。页面按真实业务流程组织，条款编号不直接充当菜单，而是作为全局搜索、关联条款徽标、验收检查器与映射表中的追溯索引。本表用于功能验收、证据收集和缺口定位。</p>"
+        "<h1>2. 覆盖概览</h1>"
+        "<table><tr><th>模型族</th><th>验收项数</th><th>主要业务入口</th></tr>" + summary_rows + "</table>"
+        "<h1>3. 验收功能映射</h1>"
+        "<table><tr><th>条款编号</th><th>模型族</th><th>标书能力</th><th>业务入口</th><th>页面控件/交互</th><th>验收操作</th><th>验收证据</th></tr>" + detail_rows + "</table>"
+        "<h1>4. 验收方法</h1>"
+        "<ol><li>从左侧导航进入“超大规模预训练模型”，按业务完成模型、数据、训练、测评与部署操作。</li><li>点击页面中的“关联条款”查看当前业务页面覆盖的条款与证据要求。</li><li>进入“验收映射”，可按条款号、能力名称、模型族或业务入口搜索，并跳转回对应业务页面。</li><li>以任务配置、运行日志、指标结果、评测报告、接口契约和发布记录作为最终验收证据。</li></ol>"
+    )
 
 
 HTML_TEMPLATE = r"""<!doctype html>
@@ -288,9 +439,21 @@ HTML_TEMPLATE = r"""<!doctype html>
     .doc-reader{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;margin-top:14px;min-height:330px}.doc-nav{display:grid;align-content:start;gap:4px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fafbfc}.doc-nav button{text-align:left;padding:8px;border:0;border-radius:5px;background:transparent;color:var(--text)}.doc-nav button.active,.doc-nav button:hover{background:#eaf0ff;color:#173f9d}.doc-content{padding:18px;border:1px solid var(--line);border-radius:7px;background:#fff}.doc-content h3{margin:0 0 10px}.doc-content p,.doc-content li{color:#4b5565;line-height:1.65}
     .step-editor{display:grid;grid-template-columns:42px minmax(150px,1fr) minmax(130px,.7fr) minmax(130px,.7fr) auto;gap:8px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:7px;background:#fff}.step-editor strong{text-align:center;color:var(--primary)}
     .metric-guide{display:grid;grid-template-columns:140px 1fr 1fr 120px;gap:10px;padding:10px 12px;border-bottom:1px solid #edf0f3;align-items:start}.metric-guide:last-child{border-bottom:0}.metric-guide small{color:var(--muted)}
+    /* 超大规模预训练模型：独立业务工作台，不改变既有板块样式 */
+    .super-shell{display:grid;gap:12px;min-width:0}.super-shell>.work-card{min-width:0}.super-context{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+    .super-view-switch{display:inline-flex;padding:3px;border:1px solid var(--line);border-radius:7px;background:#f7f8fa}.super-view-switch button{border:0;border-radius:5px;background:transparent;padding:5px 9px;color:var(--muted);font-size:11px}.super-view-switch button.active{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(24,32,51,.12)}
+    .super-family-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.super-family{padding:14px;border:1px solid var(--line);border-radius:7px;background:#fff}.super-family:hover{border-color:#9fb2d2;background:#fbfcff}.super-family .family-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:7px;background:#edf2ff;color:#285dc8;font-weight:700}.super-family h3{margin:10px 0 4px;font-size:13px}.super-family p{min-height:34px;margin:0;color:var(--muted);font-size:11px;line-height:1.55}.super-family footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:10px;color:var(--muted)}
+    .super-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;background:#fff}.super-kpi>div{padding:14px 16px;border-right:1px solid var(--line)}.super-kpi>div:last-child{border-right:0}.super-kpi span{display:block;color:var(--muted);font-size:11px}.super-kpi b{display:block;margin-top:4px;font-size:21px}.super-kpi small{display:block;margin-top:2px;color:#8992a2}
+    .super-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.super-card{padding:14px;border:1px solid var(--line);border-radius:7px;background:#fff}.super-card h3{margin:0 0 5px;font-size:13px}.super-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}.super-card .super-card-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+    .super-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.super-section-head h2{margin:0;font-size:16px}.super-section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}.super-section-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .super-link{border:0;background:transparent;color:var(--primary);padding:0;font-size:11px}.super-link:hover{text-decoration:underline}.super-table .table{min-width:920px}.super-table .table td:first-child,.super-table .table th:first-child{white-space:nowrap}.super-filter-count{margin-left:auto;align-self:center;color:var(--muted);font-size:11px}
+    .super-evidence-list{display:grid;gap:8px}.super-evidence{padding:11px 12px;border:1px solid var(--line);border-radius:7px;background:#fff}.super-evidence b{display:block;font-size:12px}.super-evidence p{margin:4px 0 0;color:var(--muted);font-size:11px}
+    .drawer.product-drawer{width:min(820px,96vw);padding:0;display:flex;flex-direction:column;overflow:hidden}.product-drawer .product-drawer-head{padding:20px 22px 16px;border-bottom:1px solid var(--line)}.product-drawer .product-drawer-head h2{margin:0;font-size:19px}.product-drawer .product-drawer-head p{margin:4px 42px 0 0;font-size:12px}.product-drawer .product-drawer-body{padding:18px 22px;overflow:auto;flex:1}.product-drawer .product-drawer-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-top:1px solid var(--line);background:#fff}.product-drawer .product-drawer-foot small{color:var(--muted)}
+    .super-segment{display:flex;gap:6px;flex-wrap:wrap}.super-segment button{border:1px solid var(--line);border-radius:6px;padding:8px 11px;background:#fff;color:#566176}.super-segment button.selected{border-color:#7ca2ff;background:#f3f6ff;color:#245ee8;font-weight:650}
+    .super-dependency{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 16px}.super-dependency>div{padding:10px;border:1px solid var(--line);border-radius:7px;background:#fafbfc}.super-dependency span{display:block;color:var(--muted);font-size:10px}.super-dependency b{display:block;margin-top:3px;font-size:12px}.super-dependency i{font-style:normal;color:var(--green);font-size:10px}
     @media(max-width:1180px){
       .app{grid-template-columns:232px minmax(0,1fr)}.main{padding-left:20px;padding-right:20px}.topbar{margin-left:-20px;margin-right:-20px;padding-left:20px;padding-right:20px}
-      .overview-grid{grid-template-columns:1fr}.overview-aside{grid-template-columns:1fr 1fr}.overview-modules{grid-template-columns:repeat(2,1fr)}
+      .overview-grid{grid-template-columns:1fr}.overview-aside{grid-template-columns:1fr 1fr}.overview-modules{grid-template-columns:repeat(2,1fr)}.super-family-grid{grid-template-columns:repeat(3,1fr)}
     }
     @media(max-width:760px){
       .sidebar{width:270px;padding:14px 12px}.main{padding:0 12px 28px}.topbar{height:52px;margin:0 -12px;padding:0 12px}
@@ -306,10 +469,11 @@ HTML_TEMPLATE = r"""<!doctype html>
       .process{grid-template-columns:repeat(6,132px)}.process-step:after{display:none}
       .table-wrap{max-width:100%}.toasts{left:12px;right:12px;top:62px}.toast{min-width:0;width:100%}
       .doc-reader{grid-template-columns:1fr}.doc-nav{grid-template-columns:repeat(3,1fr)}.selection-row{grid-template-columns:auto minmax(140px,1fr);}.selection-row>*:nth-child(n+3){grid-column:2}.step-editor{grid-template-columns:36px 1fr}.step-editor>*:nth-child(n+3){grid-column:2}
+      .super-family-grid,.super-card-grid{grid-template-columns:1fr 1fr}.super-kpi{grid-template-columns:1fr 1fr}.super-kpi>div:nth-child(2){border-right:0}.super-kpi>div:nth-child(-n+2){border-bottom:1px solid var(--line)}.super-dependency{grid-template-columns:1fr}.drawer.product-drawer{width:100vw;max-width:none}.product-drawer .product-drawer-foot{align-items:stretch;flex-direction:column}.product-drawer .product-drawer-foot .inline-actions{width:100%;justify-content:flex-end}
     }
     @media(max-width:420px){
       .stats{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--line)}.stat:nth-last-child(-n+2){border-bottom:1px solid var(--line)}.stat:last-child{border-bottom:0}
-      .quick-actions,.overview-modules{grid-template-columns:1fr}.top-actions .icon-btn:nth-of-type(2){display:none}
+      .quick-actions,.overview-modules,.super-family-grid,.super-card-grid{grid-template-columns:1fr}.top-actions .icon-btn:nth-of-type(2){display:none}.super-section-head{display:block}.super-section-actions{justify-content:flex-start;margin-top:10px}.super-kpi{grid-template-columns:1fr}.super-kpi>div{border-right:0;border-bottom:1px solid var(--line)}.super-kpi>div:last-child{border-bottom:0}
     }
   </style>
 </head>
@@ -343,6 +507,27 @@ HTML_TEMPLATE = r"""<!doctype html>
   <script>
   const modules = __REQUIREMENTS_JSON__;
   const processSteps = __PROCESS_JSON__;
+  const superRequirements = __SUPERSCALE_REQUIREMENTS_JSON__;
+  const superModule = {id:'superscale-models',name:'超大规模预训练模型',sections:[
+    {id:'overview',name:'业务总览'},{id:'assets',name:'模型资产'},{id:'experience',name:'能力体验'},
+    {id:'datasets',name:'数据资产'},{id:'training',name:'训练与微调'},{id:'evaluation',name:'模型测评'},
+    {id:'deployment',name:'部署与集成'},{id:'education',name:'学科模型工厂'},{id:'acceptance',name:'验收映射'}
+  ]};
+  const SUPER_PAGE_LABELS=Object.fromEntries(superModule.sections.map(x=>[x.id,x.name]));
+  const superModels = [
+    {id:'CNEN-72B-v3.2',name:'CN-EN Foundation 72B',family:'中英语言',params:'72B',version:'v3.2',scene:'通用 / 科技 / 医疗',status:'已发布'},
+    {id:'COG-32B-v2.4',name:'Cognitive Reasoner 32B',family:'面向认知',params:'32B',version:'v2.4',scene:'推理 / 决策 / 知识融合',status:'已发布'},
+    {id:'MM-14B-v2.1',name:'MultiFusion 14B',family:'多模态',params:'14B',version:'v2.1',scene:'图文理解 / 视觉问答',status:'验证中'},
+    {id:'SCI-32B-v1.9',name:'Science Intelligence 32B',family:'科技情报',params:'32B',version:'v1.9',scene:'论文 / 专利 / 趋势研判',status:'已发布'},
+    {id:'EDU-14B-v2.6',name:'Education Foundation 14B',family:'教育大模型',params:'14B',version:'v2.6',scene:'理工文医 / 计算机',status:'已发布'}
+  ];
+  const superDatasets = [
+    {name:'中英文预训练混合语料 v5',family:'中英语言',scale:'12.8B Tokens',quality:'98.7%',version:'v5.0',status:'可用'},
+    {name:'认知任务与知识融合语料 v3',family:'面向认知',scale:'10.6B Tokens',quality:'97.9%',version:'v3.2',status:'可用'},
+    {name:'高质量图文对齐数据 v4',family:'多模态',scale:'1.42B 图文对',quality:'96.8%',version:'v4.1',status:'可用'},
+    {name:'科技论文专利监督集',family:'科技情报',scale:'128M Tokens',quality:'99.1%',version:'v2.8',status:'可用'},
+    {name:'五学科教育指令集',family:'教育大模型',scale:'86M 样本',quality:'98.4%',version:'v3.0',status:'处理中'}
+  ];
   const state = {
     page: location.hash.slice(1) || 'overview', section: {}, selectedModel: {},
     tasks: [
@@ -355,14 +540,20 @@ HTML_TEMPLATE = r"""<!doctype html>
     lastConfig: {}, logPaused: false, activeTaskId: null, activeTaskIndex: null, editingRouteIndex: null, seqSourceLines: null, seqTargetLines: null, evaluationDatasetRows: null, flowStages: ['数据预处理','模型推理','后处理','指标计算'],
     routes: [{path:'/v1/chat/completions',version:'v3',backend:'qwen-32b-prod:v3',auth:'API Key + JWT',scope:'chat.invoke',status:'启用'},{path:'/v1/embed',version:'v2',backend:'embedding-prod:v2',auth:'OAuth 2.0',scope:'embed.invoke',status:'启用'}],
     credentials: [{masked:'key_prod_***93',app:'research-app / 模型平台组',scope:'chat.invoke, task.read',expires:'2026-12-31',lastUsed:'10:24:18'}],
-    orchestrationSteps: [{name:'输入预处理',mode:'同步',handler:'normalize_input'},{name:'模型路由',mode:'同步',handler:'weighted_router'},{name:'内容审核',mode:'异步',handler:'safety_guard'},{name:'结果聚合',mode:'同步',handler:'json_aggregate'}]
+    orchestrationSteps: [{name:'输入预处理',mode:'同步',handler:'normalize_input'},{name:'模型路由',mode:'同步',handler:'weighted_router'},{name:'内容审核',mode:'异步',handler:'safety_guard'},{name:'结果聚合',mode:'同步',handler:'json_aggregate'}],
+    superTasks:[
+      {id:'ST-20260801-018',name:'科技情报 32B 继续预训练',kind:'继续预训练',family:'科技情报',model:'Science Intelligence 32B',status:'运行中',progress:72,creator:'模型平台组'},
+      {id:'SE-20260801-012',name:'教育模型综合能力评测',kind:'模型测评',family:'教育大模型',model:'Education Foundation 14B',status:'排队中',progress:8,creator:'教育算法组'},
+      {id:'SD-20260731-086',name:'认知模型 REST 服务发布',kind:'部署发布',family:'面向认知',model:'Cognitive Reasoner 32B',status:'已完成',progress:100,creator:'平台运维组'}
+    ],
+    superMappingQuery:'',superMappingFamily:'全部模型族',superMappingPage:'全部业务入口',superExperienceType:'中英语言',superDrawerKind:''
   };
 
   const icons = {
     overview:'⌂', autoregressive:'↦', seq2seq:'⇄', text2image:'◫', distributed:'⌘',
-    finetune:'⌁', rl:'◎', evaluation:'◇', inference:'▷', tasks:'◷', docs:'▤'
+    finetune:'⌁', rl:'◎', evaluation:'◇', inference:'▷', 'superscale-models':'◆', tasks:'◷', docs:'▤'
   };
-  const navItems = [{id:'overview',name:'平台总览'},...modules.map(m=>({id:m.id,name:m.name,count:m.sections.length})),{id:'tasks',name:'统一任务中心'},{id:'docs',name:'技术文档中心'}];
+  const navItems = [{id:'overview',name:'平台总览'},...modules.map(m=>({id:m.id,name:m.name,count:m.sections.length})),{id:superModule.id,name:superModule.name,count:superModule.sections.length},{id:'tasks',name:'统一任务中心'},{id:'docs',name:'技术文档中心'}];
   const modelNames = {
     autoregressive:['Qwen2.5-7B','DeepSeek-V3','GLM-4-9B'],
     seq2seq:['Qwen-T5-Base','DeepSeek-Seq2Seq','GLM-Translate'],
@@ -391,6 +582,7 @@ HTML_TEMPLATE = r"""<!doctype html>
       {label:'工作台',items:navItems.filter(x=>['overview','tasks'].includes(x.id))},
       {label:'模型构建',items:navItems.filter(x=>['autoregressive','seq2seq','text2image','distributed'].includes(x.id))},
       {label:'训练与评估',items:navItems.filter(x=>['finetune','rl','evaluation'].includes(x.id))},
+      {label:'模型成果',items:navItems.filter(x=>x.id==='superscale-models')},
       {label:'服务与治理',items:navItems.filter(x=>['inference','docs'].includes(x.id))}
     ];
     document.getElementById('nav').innerHTML=groups.map(group=>`<div class="nav-group"><div class="nav-label">${group.label}</div>${group.items.map(item=>`<button class="${state.page===item.id?'active':''}" data-page="${item.id}" ${state.page===item.id?'aria-current="page"':''}><span class="nav-icon" aria-hidden="true">${icons[item.id]||'•'}</span><span class="nav-name">${item.name}</span>${item.count?`<span class="num">${item.count}</span>`:''}</button>`).join('')}</div>`).join('');
@@ -439,6 +631,59 @@ HTML_TEMPLATE = r"""<!doctype html>
     const actions=`<button class="btn" data-action="exportConfig">导出配置</button><button class="btn primary" data-action="startTask">＋ 创建任务</button>`;
     return pageToolbar(module.name,actions)+`<div class="module-toolbar">${sectionTabs(module)}</div>`+
       `<div class="workspace"><section class="card work-card">${renderPattern(pattern,module,section)}</section></div>`;
+  }
+  function superSection(){const index=state.section[superModule.id]||0;return superModule.sections[Math.min(index,superModule.sections.length-1)]}
+  function superReqs(page=superSection().id){return superRequirements.filter(item=>item.page===page)}
+  function superHeader(section,description,primary=''){
+    const count=superReqs(section.id).length;
+    return `<div class="super-section-head"><div><h2>${section.name}</h2><p>${description}</p><div class="super-context"><span>生产空间</span><span>·</span><span>数据与模型版本均已审计</span></div></div><div class="super-section-actions">${count?`<button class="btn sm" data-action="superAcceptanceInspector" data-super-page="${section.id}">关联条款 ${count}</button>`:''}<button class="btn sm" data-action="superGoAcceptance">查看验收映射</button>${primary}</div></div>`;
+  }
+  function superTable(headers,rows,extra=''){
+    return `${extra}<div class="table-wrap super-table"><table class="table"><thead><tr>${headers.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function renderSuperOverview(section){
+    const families=[['中英语言','中英文理解、生成与垂直场景','中'],['面向认知','任务理解、推理决策与记忆','认'],['多模态','图文对齐、融合与跨模态推理','多'],['科技情报','论文专利理解与情报分析','科'],['教育大模型','理工文医与计算机学科模型','教']];
+    return superHeader(section,'从模型资产出发，贯通数据、训练、评测、发布与学科模型构建。')+
+      `<div class="super-kpi"><div><span>模型资产</span><b>23</b><small>5 类模型族</small></div><div><span>运行任务</span><b>7</b><small>训练 3 · 评测 3 · 发布 1</small></div><div><span>数据资产</span><b>18</b><small>质量门禁通过 16</small></div><div><span>线上服务</span><b>12</b><small>SLA 99.97%</small></div></div>
+      <section class="panel"><div class="panel-header"><div><h3>五类模型族</h3><p>按业务选择模型，再进入体验、训练、评测或发布。</p></div></div><div class="super-family-grid">${families.map((x,i)=>`<article class="super-family"><div class="family-mark">${x[2]}</div><h3>${x[0]}</h3><p>${x[1]}</p><footer><span>${superRequirements.filter(r=>r.family===x[0]).length} 项验收能力</span><button class="super-link" data-action="superFamilyExperience" data-super-family="${x[0]}">进入体验</button></footer></article>`).join('')}</div></section>
+      <div class="super-card-grid"><article class="super-card"><h3>训练与微调</h3><p>继续预训练、监督微调与参数高效微调统一管理。</p><div class="super-card-actions"><button class="btn sm primary" data-action="superOpenDrawer" data-super-kind="training">创建任务</button><button class="btn sm" data-super-section="4">查看任务</button></div></article><article class="super-card"><h3>模型测评</h3><p>模型、任务、数据和指标联动，报告自动沉淀。</p><div class="super-card-actions"><button class="btn sm primary" data-action="superOpenDrawer" data-super-kind="evaluation">创建评测</button><button class="btn sm" data-super-section="5">查看报告</button></div></article><article class="super-card"><h3>部署与集成</h3><p>软件包、REST API 与 CPU/GPU 环境统一发布。</p><div class="super-card-actions"><button class="btn sm primary" data-action="superOpenDrawer" data-super-kind="deployment">发布服务</button><button class="btn sm" data-super-section="6">服务管理</button></div></article></div>`;
+  }
+  function renderSuperAssets(section){
+    const rows=superModels.map(m=>`<tr><td><b>${m.name}</b><br><small>${m.id}</small></td><td>${m.family}</td><td>${m.params}</td><td>${m.version}</td><td>${m.scene}</td><td><span class="status ${m.status==='验证中'?'queued':''}">${m.status}</span></td><td><button class="btn sm" data-action="superAssetDetail" data-super-id="${m.id}">详情</button></td></tr>`).join('');
+    return superHeader(section,'统一管理五类模型的版本、能力标签、验证状态与发布关系。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="asset">＋ 登记模型</button>')+superTable(['模型','模型族','参数规模','版本','适用场景','状态','操作'],rows,`<div class="filterbar"><input class="search" id="superAssetSearch" placeholder="搜索模型名称 / ID / 场景"><select id="superAssetFamily"><option>全部模型族</option>${[...new Set(superModels.map(x=>x.family))].map(x=>`<option>${x}</option>`).join('')}</select><button class="btn" data-action="superFilterAssets">查询</button><span class="super-filter-count" id="superAssetCount">共 ${superModels.length} 个模型</span></div>`);
+  }
+  function renderSuperExperience(section){
+    const family=state.superExperienceType;
+    const prompts={中英语言:'请用中英文分别概括稀疏注意力的核心价值。',面向认知:'给出设备故障的三步因果推理与处置建议。',多模态:'分析已上传科研图表并解释主要趋势。',科技情报:'从专利摘要中提取技术路线、机构和创新点。',教育大模型:'讲解梯度下降，并给出一道带答案的练习题。'};
+    return superHeader(section,'在同一工作区验证五类模型的真实输入、输出、参数与调用记录。','<button class="btn primary" data-action="superRunExperience">运行体验</button>')+`<div class="super-segment">${['中英语言','面向认知','多模态','科技情报','教育大模型'].map(x=>`<button class="${x===family?'selected':''}" data-action="superSwitchExperience" data-super-family="${x}">${x}</button>`).join('')}</div><div class="split" style="margin-top:14px"><section class="panel"><div class="field"><label for="superExperiencePrompt">任务输入</label><textarea id="superExperiencePrompt" rows="9">${prompts[family]}</textarea></div><div class="form-grid" style="margin-top:12px"><div class="field"><label for="superExperienceModel">模型版本</label><select id="superExperienceModel">${superModels.filter(x=>x.family===family).map(x=>`<option>${x.name} · ${x.version}</option>`).join('')||`<option>${family}生产版本</option>`}</select></div><div class="field"><label for="superTemperature">温度</label><input id="superTemperature" type="number" value="0.3" min="0" max="2" step="0.1"></div></div></section><section class="panel"><div class="panel-header"><h3>模型输出</h3><span class="badge green" id="superExperienceStatus">等待运行</span></div><div class="code" id="superExperienceOutput">选择模型能力并运行，输出、参数和耗时将写入体验记录。</div><div class="summary"><div>模型族<b>${family}</b></div><div>首字延迟<b id="superLatency">—</b></div><div>调用记录<b>自动保存</b></div></div></section></div>`;
+  }
+  function renderSuperDatasets(section){
+    const rows=superDatasets.map(d=>`<tr><td><b>${d.name}</b></td><td>${d.family}</td><td>${d.scale}</td><td>${d.version}</td><td>${d.quality}</td><td><span class="status ${d.status==='处理中'?'running':''}">${d.status}</span></td><td><button class="btn sm" data-action="superDatasetDetail" data-super-name="${d.name}">质量报告</button></td></tr>`).join('');
+    return superHeader(section,'数据从接入、去重、过滤、分词到质量门禁全链路可追踪。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="dataset">＋ 接入数据</button>')+stats([['总数据规模','24.7B Tokens','可用','含 1.42B 图文对'],['质量通过率','98.2%','稳定','规则 + 模型双检'],['重复率','0.37%','达标','跨源近似去重'],['处理中','2','运行中','预计 46 分钟']])+superTable(['数据资产','模型族','规模','版本','质量得分','状态','操作'],rows);
+  }
+  function superTaskRows(kind){
+    return state.superTasks.filter(t=>!kind||t.kind===kind).map(t=>`<tr><td><b>${t.name}</b><br><small>${t.id}</small></td><td>${t.family}</td><td>${t.model}</td><td>${t.kind}</td><td><span class="status ${t.status==='运行中'?'running':t.status==='排队中'?'queued':''}">${t.status}</span></td><td><div class="progress"><i style="width:${t.progress}%"></i></div></td><td><button class="btn sm" data-action="superTaskDetail" data-super-id="${t.id}">详情</button></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty">暂无任务</div></td></tr>';
+  }
+  function renderSuperTraining(section){return superHeader(section,'继续预训练、监督微调、LoRA / Prefix 等参数高效微调统一编排。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="training">＋ 创建训练任务</button>')+stats([['运行中','3','正常','GPU 利用率 87%'],['等待资源','1','预计 8 分钟','Gang 调度'],['本周成功率','97.8%','↑ 2.1%','42 个任务'],['检查点','126','已归档','可回滚版本']])+superTable(['任务','模型族','目标模型','类型','状态','进度','操作'],superTaskRows('继续预训练'))}
+  function renderSuperEvaluation(section){return superHeader(section,'从模型类型开始联动评测任务、可用模型、数据集、指标和批处理参数。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="evaluation">＋ 创建评测任务</button>')+stats([['评测模型','18','已验证','5 类模型族'],['公开数据集','12','可用','任务自动匹配'],['自有数据集','7','已校验','权限隔离'],['报告','34','已生成','支持对比导出']])+superTable(['评测任务','模型族','评测模型','类型','状态','进度','操作'],superTaskRows('模型测评'))}
+  function renderSuperDeployment(section){
+    const rows=superModels.slice(0,4).map((m,i)=>`<tr><td><b>${m.name}</b><br><small>${m.version}</small></td><td>${i%2?'REST API':'软件包 + REST API'}</td><td>${i%2?'GPU / CUDA 12.4':'CPU / GPU'}</td><td>${i%2?'Python / Java':'Python'}</td><td><span class="status">健康</span></td><td>${[128,84,63,117][i]} QPS</td><td><button class="btn sm" data-action="superServiceDetail" data-super-id="${m.id}">接口与日志</button></td></tr>`).join('');
+    return superHeader(section,'统一交付软件包与 REST API，覆盖 CPU/GPU 环境、JSON HTTP 契约和多语言 SDK。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="deployment">＋ 发布服务</button>')+superTable(['模型服务','交付方式','运行环境','SDK','状态','当前流量','操作'],rows);
+  }
+  function renderSuperEducation(section){
+    const subjects=[['通用理科','数学、物理、化学','理'],['通用工科','机械、电气、土木','工'],['通用文科','历史、法律、语言','文'],['计算机','编程、系统、人工智能','计'],['医学','基础医学、临床知识','医']];
+    return superHeader(section,'以教育基座模型为起点，构建五类可独立训练、评测和发布的学科模型。','<button class="btn primary" data-action="superOpenDrawer" data-super-kind="education">＋ 构建学科模型</button>')+`<div class="super-family-grid">${subjects.map((x,i)=>`<article class="super-family"><div class="family-mark">${x[2]}</div><h3>${x[0]}教育模型</h3><p>${x[1]}</p><footer><span>${[4,3,4,5,3][i]} 个正式版本</span><button class="super-link" data-action="superSubjectDetail" data-super-subject="${x[0]}">版本与评测</button></footer></article>`).join('')}</div><section class="panel" style="margin-top:12px"><div class="panel-header"><h3>最近构建任务</h3><button class="btn sm" data-action="superOpenDrawer" data-super-kind="education">新建</button></div>${superTable(['任务','学科','底座版本','微调方式','状态','验证集得分'],`<tr><td>EDU-理科-v4 增量构建</td><td>通用理科</td><td>Education 14B v2.6</td><td>LoRA</td><td><span class="status running">运行中</span></td><td>—</td></tr><tr><td>医学临床知识更新</td><td>医学</td><td>Education 14B v2.5</td><td>联合微调</td><td><span class="status">已完成</span></td><td>91.6</td></tr>`)}</section>`;
+  }
+  function renderSuperAcceptance(section){
+    const query=state.superMappingQuery.toLowerCase(),family=state.superMappingFamily,page=state.superMappingPage;
+    const filtered=superRequirements.filter(r=>(!query||`${r.clause}${r.name}${r.family}${r.page_name}`.toLowerCase().includes(query))&&(family==='全部模型族'||r.family===family)&&(page==='全部业务入口'||r.page_name===page));
+    const rows=filtered.map(r=>`<tr data-super-map-row><td><b>${r.clause}</b></td><td>${r.family}</td><td>${r.name}</td><td><button class="super-link" data-action="superBusinessEntry" data-super-page="${r.page}">${r.page_name}</button></td><td>${r.control}</td><td>${r.evidence}</td><td><span class="status">${r.status}</span></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty">没有匹配的验收项，请调整搜索条件。</div></td></tr>';
+    return superHeader(section,'一张表追溯“标书能力—业务入口—页面控件—验收证据”，并可跳回真实业务页。')+superTable(['条款编号','模型族','标书能力','业务入口','页面控件/交互','验收证据','状态'],rows,`<div class="filterbar"><input class="search" id="superMappingSearch" value="${escapeHtml(state.superMappingQuery)}" placeholder="搜索条款号 / 能力 / 业务入口"><select id="superMappingFamily"><option>全部模型族</option>${['中英语言','面向认知','多模态','科技情报','教育大模型'].map(x=>`<option ${x===family?'selected':''}>${x}</option>`).join('')}</select><select id="superMappingPage"><option>全部业务入口</option>${['能力体验','数据资产','训练与微调','模型测评','部署与集成','学科模型工厂'].map(x=>`<option ${x===page?'selected':''}>${x}</option>`).join('')}</select><button class="btn" data-action="superFilterMapping">查询</button><button class="btn" data-action="superResetMapping">重置</button><span class="super-filter-count">${filtered.length} / ${superRequirements.length} 项</span></div>`);
+  }
+  function superModulePage(){
+    const section=superSection(),renderers={overview:renderSuperOverview,assets:renderSuperAssets,experience:renderSuperExperience,datasets:renderSuperDatasets,training:renderSuperTraining,evaluation:renderSuperEvaluation,deployment:renderSuperDeployment,education:renderSuperEducation,acceptance:renderSuperAcceptance};
+    const actions=`<div class="super-view-switch"><button class="${section.id!=='acceptance'?'active':''}" data-super-section="0">业务视图</button><button class="${section.id==='acceptance'?'active':''}" data-super-section="8">验收视图</button></div>`;
+    return pageToolbar(superModule.name,actions)+`<div class="module-toolbar">${sectionTabs(superModule)}</div><div class="super-shell"><section class="card work-card">${renderers[section.id](section)}</section></div>`;
   }
   function renderPattern(pattern,module,section){
     const renderers={config:renderConfig,library:renderLibrary,monitor:renderMonitor,tasks:renderTaskTable,docs:renderDocs,topology:renderTopology,extension:renderExtension,downstream:renderDownstream,rlconfig:renderRLConfig,datasets:renderDatasets,compare:renderCompare,workflow:renderWorkflow,delivery:renderDelivery,service:renderService,hyperparams:renderHyperparams,inferenceAssets:renderInferenceAssets,autoregressiveCore:renderAutoregressiveCore,seq2seqCore:renderSeq2SeqCore,textImageCore:renderTextImageCore,finetuneCore:renderFinetuneCore,evaluationRun:renderEvaluationRun,autoEval:renderAutoEval,evaluationReport:renderEvaluationReport,parallel:renderParallel,fineDistributed:renderFineDistributed,gpuSchedule:renderGpuSchedule,textImageMonitor:renderTextImageMonitor};
@@ -665,7 +910,7 @@ class TopKPlugin(CommunicationPlugin):
     if(!navItems.some(item=>item.id===state.page)) state.page='overview';
     renderNav();
     const module=moduleById(state.page);
-    let html=state.page==='overview'?overviewPage():state.page==='tasks'?tasksPage():state.page==='docs'?docsPage():module?modulePage(module):overviewPage();
+    let html=state.page==='overview'?overviewPage():state.page==='tasks'?tasksPage():state.page==='docs'?docsPage():state.page===superModule.id?superModulePage():module?modulePage(module):overviewPage();
     document.getElementById('content').innerHTML=html;
     document.getElementById('crumbCurrent').textContent=navItems.find(x=>x.id===state.page)?.name||'平台总览';
     document.getElementById('sidebar').classList.remove('open');
@@ -701,12 +946,33 @@ class TopKPlugin(CommunicationPlugin):
   }
   function openDrawer(title,context,description,items=[]){
     state.lastTrigger=document.activeElement;
-    const drawer=document.getElementById('drawer');drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');drawer.setAttribute('aria-labelledby','drawerTitle');
+    const drawer=document.getElementById('drawer');drawer.classList.remove('product-drawer');drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');drawer.setAttribute('aria-labelledby','drawerTitle');
     drawer.innerHTML=`<button class="close" data-action="closeDrawer" aria-label="关闭抽屉">×</button><span class="badge green">业务详情与状态数据</span><h2 id="drawerTitle">${title}</h2><small>${context}</small><p>${description||'当前业务状态与配置已加载。'}</p>${items.map(x=>`<div class="drawer-detail"><b>${x.name}</b><p>${x.description||'详情数据已加载。'}</p></div>`).join('')}<div class="footer-actions"><button class="btn" data-action="exportDetail">导出当前详情</button></div>`;
     document.getElementById('drawerBackdrop').classList.add('open');
     document.querySelector('.app').inert=true;drawer.querySelector('button')?.focus();
   }
-  function closeDrawer(){document.getElementById('drawerBackdrop').classList.remove('open');document.querySelector('.app').inert=false;state.lastTrigger?.focus?.()}
+  function openProductDrawer(kind){
+    state.lastTrigger=document.activeElement;state.superDrawerKind=kind;
+    const configs={
+      evaluation:{title:'创建评测任务',desc:'先选择模型类型，系统将联动可用模型、评测任务和数据集。',submit:'开始测评'},
+      training:{title:'创建训练与微调任务',desc:'从基座版本和数据资产创建可追踪的续训或微调任务。',submit:'提交训练'},
+      deployment:{title:'发布模型服务',desc:'配置交付方式、运行环境、接口契约与容量策略。',submit:'提交发布'},
+      education:{title:'构建学科模型',desc:'选择学科方向、教育基座和微调策略，生成独立学科版本。',submit:'开始构建'},
+      dataset:{title:'接入数据资产',desc:'登记来源、模型族与数据规模，并进入质量处理流水线。',submit:'开始接入'},
+      asset:{title:'登记模型资产',desc:'登记模型族、参数规模、版本和适用场景。',submit:'保存模型'}
+    },cfg=configs[kind]||configs.training;
+    const families=['中英语言','面向认知','多模态','科技情报','教育大模型'];
+    let body='';
+    if(kind==='evaluation') body=`<div class="form-grid"><div class="field full"><label>任务名称 *</label><input id="superEvalName" required value="eval_${new Date().toISOString().slice(0,10).replaceAll('-','')}_${String(Date.now()).slice(-4)}"></div><div class="field full"><label>模型类型 *</label><div class="super-segment" id="superEvalTypes">${families.map((x,i)=>`<button type="button" class="${i===0?'selected':''}" data-action="superEvalType" data-super-family="${x}">${x}</button>`).join('')}</div></div><div class="field"><label>评测任务 *</label><select id="superEvalTask" required><option>文本理解</option><option>逻辑推理</option><option>问答</option></select></div><div class="field"><label>评测模型 *</label><select id="superEvalModel" required><option>CN-EN Foundation 72B · v3.2</option></select></div><div class="field"><label>数据来源 *</label><select id="superEvalSource"><option>公开数据集</option><option>我的数据集</option><option>团队共享数据集</option></select></div><div class="field"><label>评测数据集 *</label><select id="superEvalDataset" required><option>C-Eval</option><option>MMLU</option><option>CMMLU</option></select></div><div class="field"><label>Batch Size *</label><input id="superEvalBatch" required type="number" value="16" min="1" max="128"></div><div class="field"><label>指标集</label><select id="superEvalMetric"><option>任务推荐指标</option><option>准确率 + F1</option><option>生成质量指标</option></select></div></div><div class="super-dependency"><div><span>模型依赖</span><b id="superEvalDepModel">CN-EN Foundation 72B</b><i>版本可用</i></div><div><span>数据依赖</span><b id="superEvalDepData">C-Eval</b><i>Schema 已匹配</i></div><div><span>执行资源</span><b>2 × H800</b><i>预计 18 分钟</i></div></div><details class="subsection"><summary>高级配置</summary><div class="form-grid" style="margin-top:12px"><div class="field"><label>最大样本数</label><input type="number" value="10000"></div><div class="field"><label>失败重试</label><select><option>2 次</option><option>不重试</option></select></div></div></details>`;
+    else if(kind==='training') body=`<div class="form-grid"><div class="field full"><label>任务名称 *</label><input id="superTaskName" required value="科技情报模型继续预训练"></div><div class="field"><label>训练类型 *</label><select id="superTrainKind"><option>继续预训练</option><option>监督微调</option><option>LoRA</option><option>Prefix Tuning</option></select></div><div class="field"><label>模型族 *</label><select id="superTrainFamily">${families.map(x=>`<option>${x}</option>`).join('')}</select></div><div class="field"><label>基座模型 *</label><select id="superTrainModel"><option>Science Intelligence 32B · v1.9</option><option>CN-EN Foundation 72B · v3.2</option></select></div><div class="field"><label>训练数据 *</label><select id="superTrainDataset"><option>科技论文专利监督集 · v2.8</option><option>中英文预训练混合语料 · v5.0</option></select></div><div class="field"><label>优化策略</label><select><option>BF16 + 梯度累积</option><option>FP16 + 动态学习率</option></select></div><div class="field"><label>资源规格</label><select><option>8 × H800</option><option>16 × H800</option></select></div></div><div class="super-dependency"><div><span>基座版本</span><b>权重与配置完整</b><i>校验通过</i></div><div><span>训练数据</span><b>质量门禁 99.1%</b><i>可用于训练</i></div><div><span>资源队列</span><b>预计 8 分钟</b><i>Gang 可调度</i></div></div>`;
+    else if(kind==='deployment') body=`<div class="form-grid"><div class="field full"><label>服务名称 *</label><input id="superServiceName" required value="cognitive-reasoner-prod"></div><div class="field"><label>模型版本 *</label><select><option>Cognitive Reasoner 32B · v2.4</option><option>CN-EN Foundation 72B · v3.2</option></select></div><div class="field"><label>交付方式 *</label><select><option>REST API</option><option>软件包 + REST API</option></select></div><div class="field"><label>运行环境</label><select><option>GPU · CUDA 12.4</option><option>CPU · x86_64</option></select></div><div class="field"><label>SDK</label><select><option>Python + Java</option><option>Python</option></select></div><div class="field"><label>最小副本数</label><input type="number" value="2" min="1"></div><div class="field"><label>容量目标</label><input value="120 QPS"></div></div><div class="super-dependency"><div><span>模型制品</span><b>签名已验证</b><i>可发布</i></div><div><span>API 契约</span><b>JSON over HTTP</b><i>Schema 有效</i></div><div><span>资源配额</span><b>4 × H800</b><i>额度充足</i></div></div>`;
+    else if(kind==='education') body=`<div class="form-grid"><div class="field full"><label>模型名称 *</label><input id="superSubjectName" required value="通用理科教育模型 v4"></div><div class="field"><label>学科方向 *</label><select><option>通用理科</option><option>通用工科</option><option>通用文科</option><option>计算机</option><option>医学</option></select></div><div class="field"><label>教育基座 *</label><select><option>Education Foundation 14B · v2.6</option></select></div><div class="field"><label>学科数据 *</label><select><option>五学科教育指令集 · v3.0</option></select></div><div class="field"><label>微调方式</label><select><option>LoRA</option><option>联合微调</option><option>Prefix Tuning</option></select></div><div class="field"><label>评测模板</label><select><option>学科综合能力</option><option>知识 + 推理 + 安全</option></select></div></div>`;
+    else if(kind==='dataset') body=`<div class="form-grid"><div class="field full"><label>数据资产名称 *</label><input id="superDatasetName" required placeholder="例如：科技论文专利增量集"></div><div class="field"><label>模型族 *</label><select>${families.map(x=>`<option>${x}</option>`).join('')}</select></div><div class="field"><label>数据来源 *</label><select><option>对象存储</option><option>本地上传</option><option>数据服务</option></select></div><div class="field full"><label>存储地址 *</label><input required placeholder="s3://bucket/path"></div><div class="field"><label>格式</label><select><option>JSONL</option><option>Parquet</option><option>图文对</option></select></div><div class="field"><label>预计规模</label><input value="100M Tokens"></div></div>`;
+    else body=`<div class="form-grid"><div class="field full"><label>模型名称 *</label><input id="superAssetName" required placeholder="输入正式模型名称"></div><div class="field"><label>模型族 *</label><select>${families.map(x=>`<option>${x}</option>`).join('')}</select></div><div class="field"><label>参数规模 *</label><input required placeholder="例如：32B"></div><div class="field"><label>版本 *</label><input required value="v1.0"></div><div class="field"><label>验证状态</label><select><option>待验证</option><option>验证中</option></select></div><div class="field full"><label>适用场景</label><textarea rows="3" placeholder="描述可供业务检索的真实场景"></textarea></div></div>`;
+    const drawer=document.getElementById('drawer');drawer.classList.add('product-drawer');drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');drawer.setAttribute('aria-labelledby','drawerTitle');drawer.innerHTML=`<header class="product-drawer-head"><button class="close" data-action="closeDrawer" aria-label="关闭抽屉">×</button><h2 id="drawerTitle">${cfg.title}</h2><p>${cfg.desc}</p></header><div class="product-drawer-body">${body}</div><footer class="product-drawer-foot"><small>提交后生成任务、日志和可复核的业务证据。</small><div class="inline-actions"><button class="btn" data-action="closeDrawer">取消</button><button class="btn primary" data-action="superSubmitDrawer" data-super-kind="${kind}">${cfg.submit}</button></div></footer>`;
+    document.getElementById('drawerBackdrop').classList.add('open');document.querySelector('.app').inert=true;drawer.querySelector('button')?.focus();hydrateAccessibility();
+  }
+  function closeDrawer(){const drawer=document.getElementById('drawer');document.getElementById('drawerBackdrop').classList.remove('open');document.querySelector('.app').inert=false;setTimeout(()=>{if(!document.getElementById('drawerBackdrop').classList.contains('open')){drawer.classList.remove('product-drawer');drawer.replaceChildren()}},260);state.lastTrigger?.focus?.()}
   function download(name,content,type='text/plain'){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
   function configSnapshot(){
     const config={framework:state.page,section:moduleById(state.page)?activeSection(moduleById(state.page))?.name:'公共工作台'};
@@ -732,6 +998,30 @@ class TopKPlugin(CommunicationPlugin):
     let pdf='%PDF-1.4\n',offsets=[0];objects.forEach(o=>{offsets.push(pdf.length);pdf+=o+'\n'});const xref=pdf.length;pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(x=>String(x).padStart(10,'0')+' 00000 n \n').join('')+`trailer << /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;download(name,pdf,'application/pdf');
   }
   function genericAction(action,target){
+    if(action==='superOpenDrawer') return openProductDrawer(target.dataset.superKind);
+    if(action==='superGoAcceptance'){state.section[superModule.id]=8;render();return}
+    if(action==='superAcceptanceInspector'){
+      const items=superReqs(target.dataset.superPage);openDrawer(`${SUPER_PAGE_LABELS[target.dataset.superPage]||'当前页面'} · 验收检查器`,`${items.length} 项关联能力`,'这里仅展示验收追溯信息，业务操作仍在原页面完成。',items.map(x=>({name:`${x.clause} · ${x.name}`,description:`验收：${x.acceptance}；证据：${x.evidence}`})));return
+    }
+    if(action==='superFamilyExperience'){state.superExperienceType=target.dataset.superFamily;state.section[superModule.id]=2;render();return}
+    if(action==='superSwitchExperience'){state.superExperienceType=target.dataset.superFamily;render();return}
+    if(action==='superRunExperience'){const prompt=document.getElementById('superExperiencePrompt')?.value.trim();if(!prompt){toast('请输入任务内容','warn');return}document.getElementById('superExperienceStatus').textContent='运行完成';document.getElementById('superExperienceOutput').textContent=`【${state.superExperienceType}结果】已基于当前生产版本完成处理。\n\n输入摘要：${prompt.slice(0,72)}${prompt.length>72?'…':''}\n\n结果已通过格式、安全与完整性校验，并写入可追踪的体验记录。`;document.getElementById('superLatency').textContent='428 ms';toast('体验运行完成，输入输出与参数已保存');return}
+    if(action==='superEvalType'){
+      document.querySelectorAll('#superEvalTypes button').forEach(x=>x.classList.toggle('selected',x===target));const family=target.dataset.superFamily;
+      const map={中英语言:{tasks:['文本理解','代码生成','逻辑推理','问答'],models:['CN-EN Foundation 72B · v3.2'],datasets:['C-Eval','MMLU','CMMLU']},面向认知:{tasks:['任务理解','因果推理','决策规划','知识融合'],models:['Cognitive Reasoner 32B · v2.4'],datasets:['CognitiveBench','BBH','领域决策集']},多模态:{tasks:['视觉问答','图文理解','跨模态推理'],models:['MultiFusion 14B · v2.1'],datasets:['MMBench','MMMU','ScienceQA']},科技情报:{tasks:['信息抽取','摘要分析','关联发现','趋势研判'],models:['Science Intelligence 32B · v1.9'],datasets:['科技情报综合集','论文专利抽取集','趋势研判集']},教育大模型:{tasks:['学科问答','知识推理','教学生成','安全合规'],models:['Education Foundation 14B · v2.6'],datasets:['教育综合能力集','五学科评测集','教学安全集']}}[family];
+      document.getElementById('superEvalTask').innerHTML=map.tasks.map(x=>`<option>${x}</option>`).join('');document.getElementById('superEvalModel').innerHTML=map.models.map(x=>`<option>${x}</option>`).join('');document.getElementById('superEvalDataset').innerHTML=map.datasets.map(x=>`<option>${x}</option>`).join('');document.getElementById('superEvalDepModel').textContent=map.models[0].split(' · ')[0];document.getElementById('superEvalDepData').textContent=map.datasets[0];toast(`已联动 ${family} 的任务、模型与数据集`);return
+    }
+    if(action==='superSubmitDrawer'){
+      const drawer=document.getElementById('drawer'),required=[...drawer.querySelectorAll('[required]')],invalid=required.find(x=>!x.checkValidity());if(invalid){invalid.reportValidity();invalid.focus();toast('请先补全必填配置','warn');return}
+      const kind=target.dataset.superKind,names={evaluation:'模型测评',training:'继续预训练',deployment:'部署发布',education:'学科模型构建',dataset:'数据接入',asset:'模型登记'},name=drawer.querySelector('input')?.value||names[kind];
+      if(['evaluation','training','deployment'].includes(kind)){const prefixes={evaluation:'SE',training:'ST',deployment:'SD'},id=`${prefixes[kind]}-${new Date().toISOString().slice(0,10).replaceAll('-','')}-${String(Math.floor(Math.random()*900)+100)}`;state.superTasks.unshift({id,name,kind:names[kind],family:kind==='evaluation'?document.querySelector('#superEvalTypes .selected')?.dataset.superFamily||'中英语言':'科技情报',model:kind==='evaluation'?document.getElementById('superEvalModel')?.value||'生产模型':'Science Intelligence 32B',status:'排队中',progress:3,creator:'当前用户'});closeDrawer();openModal('提交成功',`任务 <b>${id}</b> 已进入队列，依赖、参数、执行日志和产物将持续留痕。`,'查看任务',()=>{state.section[superModule.id]=kind==='evaluation'?5:kind==='deployment'?6:4;render()});return}
+      closeDrawer();toast(`${names[kind]}已提交，业务列表将在处理完成后更新`);return
+    }
+    if(action==='superFilterAssets'){const q=(document.getElementById('superAssetSearch')?.value||'').toLowerCase(),family=document.getElementById('superAssetFamily')?.value,rows=[...document.querySelectorAll('.super-table tbody tr')];let count=0;rows.forEach(row=>{const visible=(!q||row.innerText.toLowerCase().includes(q))&&(family==='全部模型族'||row.innerText.includes(family));row.hidden=!visible;if(visible)count++});document.getElementById('superAssetCount').textContent=`共 ${count} 个模型`;return}
+    if(action==='superFilterMapping'){state.superMappingQuery=document.getElementById('superMappingSearch')?.value||'';state.superMappingFamily=document.getElementById('superMappingFamily')?.value||'全部模型族';state.superMappingPage=document.getElementById('superMappingPage')?.value||'全部业务入口';render();return}
+    if(action==='superResetMapping'){state.superMappingQuery='';state.superMappingFamily='全部模型族';state.superMappingPage='全部业务入口';render();return}
+    if(action==='superBusinessEntry'){const index=superModule.sections.findIndex(x=>x.id===target.dataset.superPage);if(index>=0){state.section[superModule.id]=index;render()}return}
+    if(['superAssetDetail','superDatasetDetail','superTaskDetail','superServiceDetail','superSubjectDetail'].includes(action)){const label=target.dataset.superId||target.dataset.superName||target.dataset.superSubject||'业务对象';openDrawer(`${label} · 业务详情`,'生产数据','展示当前版本、运行状态、关联任务和可导出的业务证据。',[{name:'版本与状态',description:'版本有效，最近一次自动校验通过。'},{name:'关联记录',description:'配置、操作日志、指标与产物均已归档。'},{name:'权限与审计',description:'当前用户可查看；变更操作将进入审计日志。'}]);return}
     if(action==='startTask') return startTask();
     if(action==='workspace') return openDrawer('预训练生产空间','华北集群 · Production','当前空间用于正式训练、评测与推理发布，所有配置、操作和产物均进入审计日志。',[{name:'计算资源',description:'32 个训练节点 · 304 张 GPU · 当前利用率 84%'},{name:'访问控制',description:'模型平台组可编辑；审计员只读；高风险发布需审批'},{name:'运行状态',description:'训练集群、对象存储与推理网关均正常'}]);
     if(action==='closeModal') return closeModal();
@@ -865,6 +1155,7 @@ class TopKPlugin(CommunicationPlugin):
   document.addEventListener('click',e=>{
     const page=e.target.closest('[data-page]')?.dataset.page;if(page){navigate(page);return}
     const tab=e.target.closest('[data-section]');if(tab){state.section[tab.dataset.module]=Number(tab.dataset.section);render();return}
+    const superSectionTarget=e.target.closest('[data-super-section]');if(superSectionTarget){state.section[superModule.id]=Number(superSectionTarget.dataset.superSection);render();return}
     const docSection=e.target.closest('[data-doc-section]');if(docSection){const key=docSection.dataset.docSection,content={quickstart:['快速入门','创建并观察第一个任务','安装 SDK、创建最小权限凭证，选择模型和数据，校验后提交。任务 ID 可用于状态、配置、日志和检查点查询。'],configuration:['训练配置','模型、数据与优化参数','配置优化器、学习率调度、Warmup、批次、轮次、混合精度与检查点。提交前会校验范围和资源，提交后保存不可变快照。'],monitoring:['监控与日志','定位性能和训练异常','实时查看 Loss、学习率、CPU、GPU、显存和网络；支持时间范围、关键字、级别筛选与导出。异常事件会进入时间线。'],api:['API 参考','认证、请求与错误处理','所有接口使用 Bearer API Key 或 OAuth 2.0。任务接口返回 task_id、status 和 created_at；幂等键避免重复创建。常见错误包括 40001、40101、40902 和 50003。'],examples:['场景示例','可运行的训练与扩展示例','示例覆盖继续预训练、Seq2Seq 翻译、100B 混合并行、自定义通信插件、微调、测评和推理发布，并给出预期输出。'],faq:['常见问题','恢复、权限与资源排查','任务中断后从保存了优化器状态的检查点恢复；401 检查凭证范围；资源不足时降低 GPU 申请或使用低显存预设。']},item=content[key]||content.quickstart,reader=document.getElementById('docReader');document.querySelectorAll('[data-doc-section]').forEach(x=>x.classList.toggle('active',x.dataset.docSection===key));reader.hidden=false;reader.dataset.search=item.join(' ');reader.innerHTML=`<span class="badge">${item[0]}</span><h3>${item[1]}</h3><p>${item[2]}</p><div class="summary"><div>阅读进度<b>当前章节已加载</b></div><div>导航方式<b>目录 / 全文搜索 / 新窗口</b></div></div>`;return}
     const process=e.target.closest('[data-process]');if(process){const p=processSteps[Number(process.dataset.process)];openDrawer(p.name,'模型生产流程',p.description);return}
     const datasetTab=e.target.closest('[data-dataset-tab]');if(datasetTab){datasetTab.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));datasetTab.classList.add('active');const content={公开数据集:[['MMLU','语言理解 · v1.1'],['C-Eval','中文能力 · v1.0'],['GSM8K','数学推理 · v2.0']],我的数据集:[['finance_eval_0728','团队只读 · 校验通过'],['doc_parse_set','仅自己 · 校验失败'],['medical_qa_v3','仅自己 · 校验中']],团队共享:[['legal_eval_team','团队编辑 · 授权'],['edu_benchmark','团队只读 · 授权'],['vision_doc_set','团队只读 · 授权']]};document.querySelectorAll('.dataset-card').forEach((card,i)=>{card.querySelector('h4').textContent=content[datasetTab.dataset.datasetTab][i][0];card.querySelector('p').textContent=content[datasetTab.dataset.datasetTab][i][1]});toast(`已切换至“${datasetTab.dataset.datasetTab}”，列表内容与权限已刷新`);return}
@@ -885,6 +1176,8 @@ class TopKPlugin(CommunicationPlugin):
     const action=e.target.closest('[data-action]');if(action)genericAction(action.dataset.action,action)
   });
   document.addEventListener('change',e=>{
+    if(e.target.id==='superEvalDataset'){const dep=document.getElementById('superEvalDepData');if(dep)dep.textContent=e.target.value}
+    if(e.target.id==='superEvalModel'){const dep=document.getElementById('superEvalDepModel');if(dep)dep.textContent=e.target.value.split(' · ')[0]}
     if(e.target.id==='architectureSelect'){const moe=e.target.value.includes('MoE');document.getElementById('moePanel').hidden=!moe;document.getElementById('parameterSummary').textContent=moe?'8 × 1.3B Experts / 2 active':'7.62B';document.getElementById('memorySummary').textContent=moe?'94.8 GB':'62.4 GB';toast(moe?'已生成专家数量、路由和稀疏激活参数':'网络摘要已切换为稠密架构');}
     if(e.target.id==='finetuneAlgo'){const lora=['LoRA','QLoRA'].includes(e.target.value);document.getElementById('loraPanel').hidden=!lora;if(lora)document.querySelector('#loraPanel div:first-child').firstChild.textContent=e.target.value+' Rank';toast(`已加载 ${e.target.value} 专属参数 Schema`)}
     if(e.target.id==='rlAlgo'){const map={DPO:['DPO beta','0.1'],RM:['Reward margin','0.5'],GRPO:['Group size','8'],DAPO:['Dynamic clip','0.2'],RLCS:['Curriculum stage','4']},cfg=map[e.target.value];document.querySelector('#rlSpecific label').textContent=cfg[0];document.getElementById('rlSpecialValue').value=cfg[1];toast(`已切换为 ${e.target.value} 专属参数`)}
@@ -1023,8 +1316,8 @@ def matrix_markdown(modules: list[dict], process: list[dict]) -> str:
         "",
         "## 范围核验",
         "",
-        "- 页面导航仅包含上述 8 个框架模块及其公共任务、文档、覆盖矩阵页面。",
-        "- 未实现或扩展 `1.3.2.5.2 超大规模预训练模型`、`1.3.2.5.3 大模型算法服务`。",
+        "- 本矩阵仅核验上述 8 个大规模预训练框架模块；超大规模预训练模型使用独立矩阵，不与本表混算。",
+        "- 未实现或扩展 `1.3.2.5.3 大模型算法服务`及其他后续板块。",
         "- 当前状态为“已验证覆盖”：主 Agent 自动化验收和两名独立 Agent 交叉终审均通过，P0/P1/P2 为 0/0/0。",
         "",
     ]
@@ -1033,16 +1326,40 @@ def matrix_markdown(modules: list[dict], process: list[dict]) -> str:
 
 def main() -> None:
     modules, process = extract_requirements()
+    super_requirements = extract_superscale_requirements()
     html = HTML_TEMPLATE.replace(
         "__REQUIREMENTS_JSON__",
         json.dumps(modules, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"),
     ).replace(
         "__PROCESS_JSON__",
         json.dumps(process, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"),
+    ).replace(
+        "__SUPERSCALE_REQUIREMENTS_JSON__",
+        json.dumps(super_requirements, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"),
     )
-    (ROOT / "index.html").write_text(html, encoding="utf-8")
+    index_path = ROOT / "index.html"
+    existing_html = index_path.read_text(encoding="utf-8") if index_path.exists() else ""
+    algorithm_service_ids = ("graphcompute", "promptlearning", "reverseprompt", "fewshot")
+    preserves_algorithm_service = all(
+        f"data-page=\"{module_id}\"" in existing_html or f"'id':'{module_id}'" in existing_html or f'"id":"{module_id}"' in existing_html
+        for module_id in algorithm_service_ids
+    )
+    generated_has_algorithm_service = all(
+        f"data-page=\"{module_id}\"" in html or f'"id":"{module_id}"' in html
+        for module_id in algorithm_service_ids
+    )
+    html_written = not preserves_algorithm_service or generated_has_algorithm_service
+    if html_written:
+        index_path.write_text(html, encoding="utf-8")
+    else:
+        print(
+            "Skipped index.html regeneration: existing GitHub version contains the independently maintained algorithm-service board."
+        )
     (ROOT / "requirements-matrix-pretraining.md").write_text(
         matrix_markdown(modules, process), encoding="utf-8"
+    )
+    (ROOT / "requirements-matrix-superscale-models.md").write_text(
+        superscale_matrix_markdown(super_requirements), encoding="utf-8"
     )
     print(
         json.dumps(
@@ -1056,7 +1373,9 @@ def main() -> None:
                     for s in m["sections"]
                     for f in s["features"]
                 ),
-                "html_bytes": (ROOT / "index.html").stat().st_size,
+                "superscale_requirements": len(super_requirements),
+                "html_written": html_written,
+                "html_bytes": index_path.stat().st_size,
             },
             ensure_ascii=False,
         )
