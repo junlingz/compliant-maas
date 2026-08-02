@@ -47,6 +47,8 @@ const internalCopy = /标书|本原型|条款|合规覆盖|需求映射|能力�
 check(!internalCopy.test(await page.locator("body").innerText()), "overview exposes internal bid/review copy");
 check((await page.locator(".scope,.audit-card,.hero").count()) === 0, "overview still renders prototype explanation surfaces");
 check((await page.locator('[data-page="coverage"]').count()) === 0, "overview still exposes an internal coverage entry");
+check((await page.locator('.workspace-switcher,[data-action="workspace"]').count()) === 0, "removed pretraining production workspace is visible");
+check(!(await page.locator("body").innerText()).includes("预训练生产空间"), "removed pretraining production workspace copy is visible");
 for (const id of moduleIds) {
   await page.locator(`[data-page="${id}"]`).first().click();
   const count = await page.locator("[data-section]").count();
@@ -147,6 +149,8 @@ await page.locator('[data-page="seq2seq"]').first().click();
 await page.locator('[data-section="1"]').click();
 const seqDetails = await page.locator("#seq2seqArchitectureDetail").innerText();
 check(seqDetails.includes("406M") && seqDetails.includes("16"), "Seq2Seq architecture lacks layers/params/heads");
+await page.locator('[data-section="0"]').click();
+check((await page.locator("#seq2seqMonitorPanel").count()) === 1, "Seq2Seq submission lacks a dedicated dynamic monitor panel");
 
 // Source/target corpora are parsed by line and mismatches block submission.
 await page.locator('[data-section="0"]').click();
@@ -226,10 +230,22 @@ const fineReport = await page.locator("#finetuneReport").innerText();
 check(/F1|准确率/.test(fineReport) && /时长|GPU|显存|能耗/.test(fineReport), "fine-tuning report lacks metrics/time/resources");
 await page.locator('[data-section="2"]').click();
 check((await page.locator("text=GPU-0").count()) > 0, "GPU schedule page lacks per-GPU metrics");
+await page.locator('[data-section="1"]').click();
+check((await page.locator('[data-failed-finetune]').count()) === 1, "fine-tuning queue lacks a failed task");
+await page.locator('[data-queue-action="resubmit"]').click();
+check((await page.locator('[data-failed-finetune]').innerText()).includes("按原配置重新排队"), "failed fine-tuning task was not resubmitted with original config");
+await page.locator('[data-section="3"]').click();
+check((await page.getByText("自定义优化器扩展模板").count()) > 0, "extension library lacks optimizer template");
+check((await page.getByText("扩展开发工具").count()) > 0 && (await page.getByText("教程与完整案例").count()) > 0, "extension tooling or tutorials are missing");
 
 // RL history and zoom change actual chart state and final metrics.
 await page.locator('[data-page="rl"]').first().click();
+await page.locator('[data-section="0"]').click();
+check((await page.locator("#rlSwaggerPanel").count()) === 1, "RL API lacks Swagger-style parameter browser");
+await page.locator('[data-action="tryRlApi"]').click();
+check((await page.locator("#rlTryResponse").innerText()).includes("queued"), "RL Try action did not return a response");
 await page.locator('[data-section="1"]').click();
+check((await page.getByText("强化学习历史任务").count()) === 1 && (await page.getByText("09:42:18").count()) > 0, "RL monitor lacks algorithm/duration/status history");
 const rlPathBefore = await page.locator(".chart path[stroke]").first().getAttribute("d");
 await page.locator("#monitorTask").selectOption({ index: 1 });
 check((await page.locator(".chart path[stroke]").first().getAttribute("d")) !== rlPathBefore, "RL history did not change chart");
@@ -250,6 +266,10 @@ await page.locator('[data-model-type="多模态模型"]').click();
 check((await page.locator("#evalTask").textContent()).includes("视觉问答"), "evaluation model type did not update tasks");
 await page.locator('[data-section="2"]').click();
 check((await page.getByText("混淆矩阵").count()) > 0, "evaluation report lacks confusion matrix");
+check((await page.locator(".radar-chart svg").count()) === 1, "evaluation report does not render a real radar chart");
+await page.screenshot({ path: screenshotPath("evaluation-report-desktop.png"), fullPage: true });
+await page.locator('[data-section="1"]').click();
+check((await page.locator("#evalTaskModelType").count()) === 1 && (await page.locator("#evalTaskOperator").count()) === 1 && (await page.locator("#evalTaskDateRange").count()) === 1, "evaluation task list lacks model/operator/date filters");
 
 // Inference asset CRUD, logs, analytics and service panels.
 await page.locator('[data-page="inference"]').first().click();
@@ -277,6 +297,19 @@ check((await page.locator("#serviceDetailTitle").textContent()).includes("编排
 check((await page.locator("#serviceDetailRows").innerText()).includes("ORCH-"), "orchestration history lacks instances");
 
 // Documents: empty state and valid PDF.
+for (const [id, expectedTitle] of [["autoregressive", "自回归预训练框架技术白皮书"], ["seq2seq", "序列到序列预训练框架技术白皮书"], ["text2image", "文-图生成训练框架技术白皮书"], ["distributed", "拓扑与资源感知分布式训练技术白皮书"]]) {
+  await page.locator(`[data-page="${id}"]`).first().click();
+  await page.locator(`[data-module="${id}"][data-section]`).filter({ hasText: "技术文档" }).click();
+  check((await page.locator('[data-acceptance="framework-whitepaper"]').innerText()).includes(expectedTitle), `${id}: dedicated whitepaper is missing`);
+}
+await page.locator('[data-page="finetune"]').first().click();
+await page.locator('[data-module="finetune"][data-section]').filter({ hasText: "技术文档" }).click();
+check((await page.locator('[data-doc-section="finetuneGuide"]').count()) === 1 && (await page.locator('[data-doc-section="finetuneEvaluation"]').count()) === 1, "fine-tuning docs lack guide/evaluation chapters");
+await page.locator('[data-doc-section="finetuneEvaluation"]').click();
+check((await page.locator("#docReader").innerText()).includes("PPL") && (await page.locator("#docReader").innerText()).includes("Recall"), "fine-tuning evaluation chapter lacks required metrics/formulas");
+await page.locator('[data-page="evaluation"]').first().click();
+await page.locator('[data-module="evaluation"][data-section]').filter({ hasText: "技术文档" }).click();
+check((await page.locator('[data-doc-section="evaluationMethods"]').count()) === 1, "evaluation docs lack dedicated model evaluation methods chapter");
 await page.locator('[data-page="docs"]').first().click();
 await page.locator("#docSearch").fill("绝对不存在的搜索词XYZ");
 await page.locator('[data-action="searchDocs"]').click();
@@ -402,16 +435,23 @@ check((await page.locator(".metric-guide").count()) >= 3, "metric library lacks 
 await page.locator('[data-page="inference"]').first().click();
 await page.locator('[data-section="0"]').click();
 check((await page.locator("#modelScenario").count()) === 1 && (await page.locator("#modelModality").count()) === 1 && (await page.locator("#modelCreator").count()) === 1 && (await page.locator("#modelSort").count()) === 1, "inference model filter dimensions missing");
+check((await page.locator("#modelLanguage").count()) === 1 && (await page.locator("#modelCategory").count()) === 1, "inference model language/category filters missing");
 await page.locator('[data-action="generateSelectedModels"]').click();
 check((await page.locator("#parallelOutputs .model-card").count()) === 2, "2–4 model experience did not use selected models");
 check((await page.locator("#experienceLogRows tr").first().innerText()).includes("temperature"), "experience log lacks full parameters");
 await page.locator('[data-section="1"]').click();
 check((await page.locator("#calibrationDataset").count()) === 1 && (await page.locator("#compressionAdvanced").count()) === 1, "delivery compression parameters missing");
 check((await page.locator("#deliveryEvalDataset").count()) === 1 && (await page.locator("#containerLimits").count()) === 1, "delivery evaluation dataset or CPU/memory limits missing");
+check((await page.locator("#deliveryTasks tr").first().innerText()).includes("P95 延迟") && (await page.locator("#deliveryTasks tr").first().innerText()).includes("Accuracy"), "compression result lacks before/after latency or accuracy");
+check((await page.locator("#deliveryQualityEvidence").innerText()).includes("Precision–Recall") && (await page.locator("#deliveryQualityEvidence").innerText()).includes("混淆矩阵"), "delivery quality evidence lacks PR curve or confusion matrix");
 await page.locator('[data-action="monitorService"]').click();
 check(await page.locator("#deliveryMonitorPanel").isVisible(), "delivery monitoring panel did not open visibly");
 check((await page.locator("#deliveryMonitorPanel .metric").count()) === 4, "delivery monitoring lacks resource/QPS/error metrics");
+check((await page.locator('[data-action="downloadDeliveryLogs"]').count()) === 1, "delivery runtime logs lack a download action");
+await page.screenshot({ path: screenshotPath("delivery-quality-desktop.png"), fullPage: true });
 await page.locator('[data-section="2"]').click();
+check((await page.locator("#serviceOpsCharts svg").count()) === 3, "service operations lacks pie/bar/trend visualizations");
+await page.screenshot({ path: screenshotPath("service-operations-desktop.png"), fullPage: true });
 await page.locator('[data-route-action="version"]').first().click();
 check((await page.locator("#routeRows tr").first().innerText()).includes("v4"), "route version did not increment from v3 to v4");
 check(!(await page.locator("#routeRows tr").first().innerText()).includes("vNaN"), "route version became vNaN");
@@ -505,6 +545,17 @@ await page.setViewportSize({ width: 320, height: 700 });
 await page.goto(freshUrl("evaluation"), { waitUntil: "networkidle" });
 const widths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
 check(widths.scroll === widths.inner, `320px viewport overflow: ${JSON.stringify(widths)}`);
+
+await page.goto(freshUrl("inference"), { waitUntil: "networkidle" });
+await page.locator('[data-module="inference"][data-section="1"]').click();
+const deliveryMobileWidths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
+check(deliveryMobileWidths.scroll === deliveryMobileWidths.inner, `delivery 320px viewport overflow: ${JSON.stringify(deliveryMobileWidths)}`);
+await page.screenshot({ path: screenshotPath("delivery-quality-mobile.png"), fullPage: true });
+await page.locator('[data-module="inference"][data-section="2"]').click();
+const serviceMobileWidths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
+check(serviceMobileWidths.scroll === serviceMobileWidths.inner, `service operations 320px viewport overflow: ${JSON.stringify(serviceMobileWidths)}`);
+check((await page.locator("#serviceOpsCharts .chart").count()) === 3, "service operations charts missing on mobile");
+await page.screenshot({ path: screenshotPath("service-operations-mobile.png"), fullPage: true });
 
 await page.goto(freshUrl("superscale-models"), { waitUntil: "networkidle" });
 await page.locator('[data-module="superscale-models"][data-section="5"]').click();

@@ -312,14 +312,6 @@ HTML_TEMPLATE = r"""<!doctype html>
       width:34px;height:34px;border-radius:8px;background:#1e55d6;box-shadow:none;font-size:14px
     }
     .brand strong{font-size:14px;line-height:1.3}.brand small{font-size:11px;margin-top:2px}
-    .workspace-switcher{
-      width:100%;display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:8px 10px;
-      color:var(--text);background:#fff;border:1px solid var(--line);border-radius:7px;text-align:left
-    }
-    .workspace-switcher:hover{border-color:var(--line-strong);background:#fcfcfd}
-    .workspace-switcher .env-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px #e7f5ef}
-    .workspace-switcher small{display:block;color:var(--muted);font-size:10px}
-    .workspace-switcher .chevron{margin-left:auto;color:#8992a3}
     .nav-group+.nav-group{margin-top:16px}
     .nav-label{padding:0 10px 6px;color:#9098a8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
     .nav{display:block}
@@ -481,7 +473,6 @@ HTML_TEMPLATE = r"""<!doctype html>
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand"><div class="brand-mark" aria-hidden="true">M</div><div><strong>大模型生产平台</strong><small>ModelOps Console</small></div><button class="icon-btn mobile-only" style="margin-left:auto" data-action="closeMenu" aria-label="关闭导航">×</button></div>
-      <button class="workspace-switcher" data-action="workspace"><span class="env-dot" aria-hidden="true"></span><span><b>预训练生产空间</b><small>华北集群 · Production</small></span><span class="chevron" aria-hidden="true">⌄</span></button>
       <nav class="nav" id="nav" aria-label="主导航"></nav>
     </aside>
     <div class="mobile-scrim" id="mobileScrim" data-action="closeMenu"></div>
@@ -1023,7 +1014,6 @@ class TopKPlugin(CommunicationPlugin):
     if(action==='superBusinessEntry'){const index=superModule.sections.findIndex(x=>x.id===target.dataset.superPage);if(index>=0){state.section[superModule.id]=index;render()}return}
     if(['superAssetDetail','superDatasetDetail','superTaskDetail','superServiceDetail','superSubjectDetail'].includes(action)){const label=target.dataset.superId||target.dataset.superName||target.dataset.superSubject||'业务对象';openDrawer(`${label} · 业务详情`,'生产数据','展示当前版本、运行状态、关联任务和可导出的业务证据。',[{name:'版本与状态',description:'版本有效，最近一次自动校验通过。'},{name:'关联记录',description:'配置、操作日志、指标与产物均已归档。'},{name:'权限与审计',description:'当前用户可查看；变更操作将进入审计日志。'}]);return}
     if(action==='startTask') return startTask();
-    if(action==='workspace') return openDrawer('预训练生产空间','华北集群 · Production','当前空间用于正式训练、评测与推理发布，所有配置、操作和产物均进入审计日志。',[{name:'计算资源',description:'32 个训练节点 · 304 张 GPU · 当前利用率 84%'},{name:'访问控制',description:'模型平台组可编辑；审计员只读；高风险发布需审批'},{name:'运行状态',description:'训练集群、对象存储与推理网关均正常'}]);
     if(action==='closeModal') return closeModal();
     if(action==='confirmModal'){const values=Object.fromEntries([...document.querySelectorAll('#modal input,#modal select,#modal textarea')].filter(x=>x.id||x.name).map(x=>[x.id||x.name,x.type==='checkbox'?x.checked:x.value])),fn=state.pendingConfirm;closeModal();if(fn)fn(values);return}
     if(action==='closeDrawer') return closeDrawer();
